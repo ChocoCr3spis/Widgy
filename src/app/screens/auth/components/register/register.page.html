@@ -1,0 +1,42 @@
+<ion-content class="ion-padding">
+
+  <div class="container">
+
+    <h1 class="title">Crear cuenta</h1>
+
+    <ion-card>
+      <p>Tienes cuenta inicia sesión aquí</p>
+      <ion-card-content [formGroup]="registerForm">
+        <ion-item>
+          <ion-label position="floating">Nombre de usuario</ion-label>
+          <ion-input formControlName="username"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Contraseña</ion-label>
+          <ion-input type="password" formControlName="password">
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Repetir contraseña</ion-label>
+          <ion-input type="password" formControlName="repeatPassword">
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" class="register-btn" [disabled]="registerForm.invalid" (click)="register()">
+          Registrarse
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+
+</ion-content>
