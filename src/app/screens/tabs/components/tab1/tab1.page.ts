@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonListHeader, IonList, IonItem, IonThumbnail, IonIcon, IonLabel, IonSkeletonText, IonButton } from '@ionic/angular/standalone';
+import { IonListHeader, IonList, IonItem, IonThumbnail, IonIcon, IonLabel, IonSkeletonText, IonButton, IonContent } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { musicalNotes } from 'ionicons/icons';
 
@@ -15,8 +15,9 @@ import { musicalNotes } from 'ionicons/icons';
     IonList,
     IonListHeader,
     IonSkeletonText,
-    IonThumbnail
-  ],
+    IonThumbnail,
+    IonContent
+],
 })
   export class Tab1Page {
     public loaded = false;
