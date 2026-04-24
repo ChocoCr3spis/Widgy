@@ -18,7 +18,6 @@ export class AuthService {
     try {
       let email = identifier;
       if (!identifier.includes('@')) {
-  
         const usersRef = collection(this.firestore, 'users');
         const q = query(usersRef, where('username', '==', identifier));
         const querySnapshot = await getDocs(q);
