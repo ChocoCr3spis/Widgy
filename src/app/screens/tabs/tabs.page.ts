@@ -3,7 +3,7 @@ import { UserService } from './../../core/services/integrations/user.service';
 import { Component, EnvironmentInjector, inject } from '@angular/core';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonAvatar, IonCard, IonItem } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { triangle, ellipse, square } from 'ionicons/icons';
+import { search, grid, personAdd } from 'ionicons/icons';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -19,7 +19,7 @@ export class TabsPage {
   constructor(
     private userService: UserService
   ) {
-    addIcons({ triangle, ellipse, square });
+    addIcons({ search, grid, personAdd });
     this.user$ = this.userService.user$;
   }
 }

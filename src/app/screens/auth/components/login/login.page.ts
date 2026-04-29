@@ -1,15 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ɵInternalFormsSharedModule } from '@angular/forms';
 import { IonListHeader, IonList, IonItem, IonThumbnail, IonIcon, IonLabel, IonSkeletonText, IonButton, IonContent, IonCard, IonCardContent, IonInput } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { musicalNotes } from 'ionicons/icons';
 import { AuthService } from 'src/app/core/services/integrations/auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: 'login.page.html',
   styleUrls: ['login.page.scss'],
-  imports: [IonContent, IonCard, IonCardContent, IonItem, IonLabel, IonInput, IonButton],
+  imports: [IonContent, IonCard, IonCardContent, IonItem, IonLabel, IonInput, IonButton, ɵInternalFormsSharedModule, ReactiveFormsModule],
 })
 
 export class Login {

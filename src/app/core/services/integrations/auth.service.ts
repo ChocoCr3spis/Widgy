@@ -16,6 +16,7 @@ export class AuthService {
 
   async login(identifier: string, password: string) {
     try {
+      debugger
       let email = identifier;
       if (!identifier.includes('@')) {
         const usersRef = collection(this.firestore, 'users');

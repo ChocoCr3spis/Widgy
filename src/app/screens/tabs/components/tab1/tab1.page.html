@@ -39,3 +39,81 @@
     
 </ion-content>   
 <ion-button (click)="loaded = !loaded">Toggle</ion-button>
+
+<ion-fab slot="fixed" vertical="bottom" horizontal="end">
+  <ion-fab-button>
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+  <ion-fab-list side="start">
+    <ion-fab-button id="open-modal-vote">
+      <ion-icon name="file-tray"></ion-icon>
+      <ion-modal #modalVote trigger="open-modal-vote" [canDismiss]="canDismiss" [presentingElement]="presentingElement">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar>
+              <ion-title>Creando widget de votación...</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="modalVote.dismiss()">Cancelar</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content class="ion-padding">
+            <p>CONTENIDO</p>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-fab-button>
+    <ion-fab-button id="open-modal-image">
+      <ion-icon name="image"></ion-icon>
+      <ion-modal #modalImage trigger="open-modal-image" [canDismiss]="canDismiss" [presentingElement]="presentingElement">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar>
+              <ion-title>Creando widget de imagen...</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="modalImage.dismiss()">Cancelar</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content class="ion-padding">
+            <p>CONTENIDO</p>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-fab-button>
+    <ion-fab-button id="open-modal-text">
+      <ion-icon name="text"></ion-icon>
+      <ion-modal #modalText trigger="open-modal-text" [canDismiss]="canDismiss" [presentingElement]="presentingElement">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar>
+              <ion-title>Creando widget de texto...</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="modalText.dismiss()">Cancelar</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content class="ion-padding" [formGroup]="textWidgetForm">
+            <ion-card>
+              <ion-item>
+                <ion-label position="floating">Nombre</ion-label>
+                <ion-input type="text" formControlName="nombre"></ion-input>
+              </ion-item>
+            </ion-card>
+            <ion-card>
+              <ion-item>
+                <ion-label position="floating">Descripción</ion-label>
+                <ion-input type="text" formControlName="descripcion"></ion-input>
+              </ion-item>
+            </ion-card>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-fab-button>
+  </ion-fab-list>
+</ion-fab>
+
+
+
+
+

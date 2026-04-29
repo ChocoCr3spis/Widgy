@@ -4,20 +4,20 @@
     
     <h1 class="title">Widgy</h1>
 
-    <ion-card>
+    <ion-card [formGroup]="loginForm">
       <ion-card-content>
 
         <ion-item>
           <ion-label position="floating">Email</ion-label>
-          <ion-input type="email"></ion-input>
+          <ion-input type="email" formControlName="usernameOrEmail"></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-label position="floating">Contraseña</ion-label>
-          <ion-input type="password"></ion-input>
+          <ion-input type="password" formControlName="password"></ion-input>
         </ion-item>
 
-        <ion-button expand="block" class="login-btn">
+        <ion-button expand="block" class="login-btn" (click)="login()">
           Iniciar sesión
         </ion-button>
 
