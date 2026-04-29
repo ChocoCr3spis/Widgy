@@ -47,66 +47,98 @@
   <ion-fab-list side="start">
     <ion-fab-button id="open-modal-vote">
       <ion-icon name="file-tray"></ion-icon>
-      <ion-modal #modalVote trigger="open-modal-vote" [canDismiss]="canDismiss" [presentingElement]="presentingElement">
+      <ion-modal #modalVote trigger="open-modal-vote" [presentingElement]="presentingElement">
         <ng-template>
           <ion-header>
             <ion-toolbar>
               <ion-title>Creando widget de votación...</ion-title>
               <ion-buttons slot="end">
-                <ion-button (click)="modalVote.dismiss()">Cancelar</ion-button>
+                <ion-button (click)="closeModal('vote', modalVote)">Cancelar</ion-button>
               </ion-buttons>
             </ion-toolbar>
           </ion-header>
-          <ion-content class="ion-padding">
-            <p>CONTENIDO</p>
+          <ion-content class="ion-padding" [formGroup]="voteWidgetForm">
+            <div class="form">
+              <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
+              <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
+              <ion-input label="Pregunta" labelPlacement="floating" fill="outline" type="text" formControlName="pregunta"></ion-input>
+              <div formArrayName="opciones" class="opciones">
+                @for(opcion of opciones.controls; track opcion){
+                  <div class="opcion">
+                    <ion-input
+                      [label]="'Opción ' + ($index + 1)"
+                      labelPlacement="floating"
+                      fill="outline"
+                      [formControlName]="$index">
+                    </ion-input>
+                    @if($index > 1){
+                      <ion-button fill="clear" color="danger" (click)="removeOption($index)">
+                        <ion-icon name="trash"></ion-icon>
+                      </ion-button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <ion-button class="ion-padding" expand="block" fill="outline" (click)="addOption()">
+                + Añadir opción
+              </ion-button>
+
+            </div>
           </ion-content>
+          <ion-button class="ion-padding" (click)="createWidget('vote', modalVote)" [disabled]="voteWidgetForm.invalid">Crear</ion-button>
         </ng-template>
       </ion-modal>
     </ion-fab-button>
     <ion-fab-button id="open-modal-image">
       <ion-icon name="image"></ion-icon>
-      <ion-modal #modalImage trigger="open-modal-image" [canDismiss]="canDismiss" [presentingElement]="presentingElement">
+      <ion-modal #modalImage trigger="open-modal-image" [presentingElement]="presentingElement">
         <ng-template>
           <ion-header>
             <ion-toolbar>
               <ion-title>Creando widget de imagen...</ion-title>
               <ion-buttons slot="end">
-                <ion-button (click)="modalImage.dismiss()">Cancelar</ion-button>
+                <ion-button (click)="closeModal('img', modalImage)">Cancelar</ion-button>
               </ion-buttons>
             </ion-toolbar>
           </ion-header>
           <ion-content class="ion-padding">
-            <p>CONTENIDO</p>
+            <div class="form" [formGroup]="imgWidgetForm">
+              <ion-input label="Nombre" labelPlacement="floating" fill="outline" formControlName="nombre"></ion-input>
+              <ion-input label="Descripción" labelPlacement="floating" fill="outline" formControlName="descripcion"></ion-input>
+              <div class="image-box" (click)="selectImage()">
+                @if(imagePreview){
+                  <img [src]="imagePreview"/>
+                }@else {
+                  <span class="plus">+</span>
+                }        
+              </div>
+            </div>
           </ion-content>
+          <ion-button class="ion-padding" (click)="createWidget('img', modalImage)" [disabled]="imgWidgetForm.invalid || !imageFile">Crear</ion-button>
         </ng-template>
       </ion-modal>
     </ion-fab-button>
     <ion-fab-button id="open-modal-text">
       <ion-icon name="text"></ion-icon>
-      <ion-modal #modalText trigger="open-modal-text" [canDismiss]="canDismiss" [presentingElement]="presentingElement">
+      <ion-modal #modalText trigger="open-modal-text" [presentingElement]="presentingElement" did>
         <ng-template>
           <ion-header>
             <ion-toolbar>
               <ion-title>Creando widget de texto...</ion-title>
               <ion-buttons slot="end">
-                <ion-button (click)="modalText.dismiss()">Cancelar</ion-button>
+                <ion-button (click)="closeModal('text', modalText)">Cancelar</ion-button>
               </ion-buttons>
             </ion-toolbar>
           </ion-header>
           <ion-content class="ion-padding" [formGroup]="textWidgetForm">
-            <ion-card>
-              <ion-item>
-                <ion-label position="floating">Nombre</ion-label>
-                <ion-input type="text" formControlName="nombre"></ion-input>
-              </ion-item>
-            </ion-card>
-            <ion-card>
-              <ion-item>
-                <ion-label position="floating">Descripción</ion-label>
-                <ion-input type="text" formControlName="descripcion"></ion-input>
-              </ion-item>
-            </ion-card>
+            <div class="form">
+              <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
+              <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
+              <ion-textarea label="Texto" labelPlacement="floating" fill="outline" placeholder="Enter text" formControlName="text" [counter]="true" [autoGrow]="true" maxlength="250"></ion-textarea>
+            </div>
           </ion-content>
+          <ion-button class="ion-padding" (click)="createWidget('text', modalText)" [disabled]="textWidgetForm.invalid">Crear</ion-button>
         </ng-template>
       </ion-modal>
     </ion-fab-button>
