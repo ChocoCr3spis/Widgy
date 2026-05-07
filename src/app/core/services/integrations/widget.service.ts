@@ -49,4 +49,11 @@ export class WidgetService {
     await updateDoc(doc(this.firestore, 'widgets', docRef.id),{ data: { imageUrl: downloadUrl } });
   }
 
+  getPublicWidgets(filters: any) {
+    const widgetsRef = collection(this.firestore, 'widgets');
+    const q = query(widgetsRef, where('visibility', '==', 'public'));
+
+    return collectionData(q, { idField: 'widgetId' })
+  }
+
 }
