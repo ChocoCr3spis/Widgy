@@ -93,7 +93,7 @@ export class Tab1Page {
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
     this.userId = (await this.userService.getCurrentUser()).uid;
-    this.widgetService.getMyWidgets().subscribe( widgets => {widgets = this.widgets; console.log(this.widgets)});
+    this.widgetService.getMyWidgets().subscribe( w => { this.widgets = w });
   }
 
   closeModal(widgetType: string, modal: any){
