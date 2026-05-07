@@ -26,4 +26,11 @@ export class WidgetService {
     return collectionData(q, { idField: 'widgetId' })
   }
 
+  getPublicWidgets(filters: any) {
+    const widgetsRef = collection(this.firestore, 'widgets');
+    const q = query(widgetsRef, where('visibility', '==', 'public'));
+
+    return collectionData(q, { idField: 'widgetId' })
+  }
+
 }
