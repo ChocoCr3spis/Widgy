@@ -1,10 +1,14 @@
 import { Component } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonListHeader, IonList, IonItem, IonThumbnail, IonIcon, IonLabel, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, ActionSheetController, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea } from '@ionic/angular/standalone';
+import { IonListHeader, IonList, IonItem, IonThumbnail, IonIcon, IonLabel, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, ActionSheetController, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { fileTray, image, text, add, trash} from 'ionicons/icons';
+import { fileTray, image, text, add, trash, appsOutline} from 'ionicons/icons';
 import { Platform } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { UserService } from 'src/app/core/services/integrations/user.service';
+import { Timestamp } from '@angular/fire/firestore';
+import { WidgetService } from 'src/app/core/services/integrations/widget.service';
+import { Widget } from 'src/app/core/models/widget.interface';
 
 @Component({
   selector: 'app-tab1',
@@ -30,8 +34,12 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
     IonButtons,
     IonInput,
     ReactiveFormsModule,
-    IonTextarea
-  ],
+    IonTextarea,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent
+],
   providers: [IonModal]
 })
 export class Tab1Page {
@@ -45,16 +53,21 @@ export class Tab1Page {
   imageFile: File | null = null;
   imagePreview: string | null = null;
 
+  userId: string = "";
+  widgets?: Widget[] | any;
+
   constructor(
     private fb: FormBuilder,
-    private platform: Platform
+    private platform: Platform,
+    private userService: UserService,
+    private widgetService: WidgetService
   ) {
-    addIcons({ fileTray, image, text, add, trash });
+    addIcons({ fileTray, image, text, add, trash, appsOutline });
 
     this.textWidgetForm = this.fb.group({
       nombre: [null, [Validators.required, Validators.maxLength(20)]],
       descripcion: [null, [Validators.required, Validators.maxLength(50)]],
-      text: [null, [Validators.required, Validators.maxLength(20)]]
+      text: [null, [Validators.required, Validators.maxLength(250)]]
     });
 
     this.voteWidgetForm = this.fb.group({
@@ -77,8 +90,10 @@ export class Tab1Page {
     return this.voteWidgetForm.get('opciones') as FormArray;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
+    this.userId = (await this.userService.getCurrentUser()).uid;
+    this.widgetService.getMyWidgets().subscribe( widgets => {widgets = this.widgets; console.log(this.widgets)});
   }
 
   closeModal(widgetType: string, modal: any){
@@ -99,12 +114,25 @@ export class Tab1Page {
     modal.dismiss();
   }
 
-  createWidget(widgetType: string, modal: any){
-    debugger
+  async createWidget(widgetType: string, modal: any){
     switch(widgetType){
       case 'vote':
-        this.voteWidgetForm.reset();
+        await this.widgetService.createWidget({
+          ownerId: this.userId,
+          visibility: 'private',
+          type: 'vote',
+          name: this.voteWidgetForm.value.nombre!,
+          description: this.voteWidgetForm.value.pregunta || '',
+          createdAt: Timestamp.now(),
+          sharedWith: [],
+          data: {
+            question: this.voteWidgetForm.value.text,
+            options: this.voteWidgetForm.value.opciones
+          }
+        });
         console.log('Datos:', this.voteWidgetForm.value);
+
+        this.voteWidgetForm.reset();
         break;
       case 'img':
         console.log('Datos:', this.imgWidgetForm.value);
@@ -112,6 +140,18 @@ export class Tab1Page {
         this.imgWidgetForm.reset();
         break;
       case 'text':
+        await this.widgetService.createWidget({
+          ownerId: this.userId,
+          visibility: 'private',
+          type: 'text',
+          name: this.textWidgetForm.value.nombre!,
+          description: this.textWidgetForm.value.descripcion || '',
+          createdAt: Timestamp.now(),
+          sharedWith: [],
+          data: {
+            text: this.textWidgetForm.value.text
+          }
+        });
         this.textWidgetForm.reset();
         break;
     }

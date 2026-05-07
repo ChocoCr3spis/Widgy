@@ -1,4 +1,4 @@
-<ion-content class="ion-padding my-widgets-cont">
+<!-- <ion-content class="ion-padding my-widgets-cont">
   @if (loaded) {
     <ion-list>
       <ion-list-header>Albums</ion-list-header>
@@ -38,7 +38,43 @@
   }
     
 </ion-content>   
-<ion-button (click)="loaded = !loaded">Toggle</ion-button>
+<ion-button (click)="loaded = !loaded">Toggle</ion-button> -->
+
+@for (widget of widgets; track widget.widgetId) {
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        {{ widget.name }}
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ widget.description }}</p>
+      @if (widget.type === 'text') {
+        <p>
+          {{ widget.data.text }}
+        </p>
+      }
+      @if (widget.type === 'image') {
+        <img [src]="widget.data.imageUrl">
+      }
+      @if (widget.type === 'vote') {
+        <p>{{ widget.data.question }}</p>
+        @for (option of widget.data.options; track option.text) {
+          <p>
+            {{ option.text }} - {{ option.votes }}
+          </p>
+        }
+      }
+    </ion-card-content>
+  </ion-card>
+}
+
+@if (!widgets) {
+  <div class="empty-state">
+    <ion-icon name="apps-outline"></ion-icon>
+    <p>No tienes widgets todavía</p>
+  </div>
+}
 
 <ion-fab slot="fixed" vertical="bottom" horizontal="end">
   <ion-fab-button>
@@ -144,6 +180,25 @@
     </ion-fab-button>
   </ion-fab-list>
 </ion-fab>
+
+<ion-modal #modalShare trigger="open-modal-image" [presentingElement]="presentingElement">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Compartirendo widget...</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal('img', modalShare)">Cancelar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <div class="form" [formGroup]="imgWidgetForm">
+        <ion-input label="Nombre" labelPlacement="floating" fill="outline" formControlName="nombre"></ion-input>
+        <ion-input label="Descripción" labelPlacement="floating" fill="outline" formControlName="descripcion"></ion-input>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
 
 
 

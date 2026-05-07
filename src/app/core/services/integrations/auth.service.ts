@@ -16,7 +16,6 @@ export class AuthService {
 
   async login(identifier: string, password: string) {
     try {
-      debugger
       let email = identifier;
       if (!identifier.includes('@')) {
         const usersRef = collection(this.firestore, 'users');
@@ -51,6 +50,6 @@ export class AuthService {
   async logout() {
     sessionStorage.clear();
     await signOut(this.auth);
-    this.router.navigateByUrl('/login')
+    this.router.navigateByUrl('/auth/login')
   }
 }

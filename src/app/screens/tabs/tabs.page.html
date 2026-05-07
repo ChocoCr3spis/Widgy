@@ -7,7 +7,7 @@
               <p class="welcome">Welcome </p>@{{ user.username }}
           </span>
         </ion-title>
-        <ion-avatar class="profile-img">
+        <ion-avatar class="profile-img" (click)="logOut()">
           <img alt="Silhouette of a person's head" src="../../../assets/profile/default_profile_image.jpeg" />
         </ion-avatar> 
       </div>

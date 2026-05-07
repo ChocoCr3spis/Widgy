@@ -5,6 +5,7 @@ import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonTool
 import { addIcons } from 'ionicons';
 import { search, grid, personAdd } from 'ionicons/icons';
 import { Observable } from 'rxjs';
+import { AuthService } from 'src/app/core/services/integrations/auth.service';
 
 @Component({
   selector: 'app-tabs',
@@ -17,9 +18,14 @@ export class TabsPage {
   user$!: Observable<any>;
 
   constructor(
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService
   ) {
     addIcons({ search, grid, personAdd });
     this.user$ = this.userService.user$;
+  }
+
+  async logOut(){
+    this.authService.logout();
   }
 }
