@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonListHeader, IonList, IonItem, IonThumbnail, IonIcon, IonLabel, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, ActionSheetController, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea, IonCardHeader, IonCardTitle, IonCardContent, IonToggle, IonChip } from '@ionic/angular/standalone';
+import { IonIcon, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, ActionSheetController, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea, IonCardHeader, IonCardTitle, IonCardContent, IonToggle, IonChip } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { fileTray, image, text, add, trash, appsOutline, eyeOutline, eyeOffOutline, createOutline, shareSocialOutline } from 'ionicons/icons';
 import { Platform } from '@ionic/angular';
@@ -18,12 +18,7 @@ import { CommonModule } from '@angular/common';
   imports: [
     IonButton,
     IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonListHeader,
     IonSkeletonText,
-    IonThumbnail,
     IonContent,
     IonFab,
     IonFabButton,
