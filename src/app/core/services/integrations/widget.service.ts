@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, collectionData, query, where, doc, updateDoc, deleteDoc } from '@angular/fire/firestore';
+import { Firestore, QueryConstraint, collection, addDoc, collectionData, query, where, doc, updateDoc, deleteDoc, orderBy, limit, startAfter, getDocs } from '@angular/fire/firestore';
 import { getDownloadURL, ref, Storage, uploadBytes, deleteObject  } from '@angular/fire/storage';
 import { Auth } from '@angular/fire/auth';
 import { Widget } from '../../models/widget.interface';
@@ -34,8 +34,8 @@ export class WidgetService {
 
   async deleteWidget(widgetId: string, widgetType: string){
     if(widgetType == 'image') {
-        const imageRef = ref(this.storage, `widgets/${widgetId}/image.jpg`);
-        deleteObject(imageRef);
+      const imageRef = ref(this.storage, `widgets/${widgetId}/image.jpg`);
+      deleteObject(imageRef);
     }
     const docRef = doc(this.firestore, `widgets/${widgetId}`);
     return deleteDoc(docRef);
@@ -49,11 +49,30 @@ export class WidgetService {
     await updateDoc(doc(this.firestore, 'widgets', docRef.id),{ data: { imageUrl: downloadUrl } });
   }
 
-  getPublicWidgets(filters: any) {
+  async getPublicWidgets(filters: any) {
     const widgetsRef = collection(this.firestore, 'widgets');
-    const q = query(widgetsRef, where('visibility', '==', 'public'));
 
-    return collectionData(q, { idField: 'widgetId' })
+    const conditions: QueryConstraint[] = [
+      where('visibility', '==', 'public'),
+      orderBy('createdAt', 'desc'),
+      limit(4),
+    ];
+
+    if (filters?.lastWidget) conditions.push(startAfter(filters.lastWidget));
+    if (filters?.type) conditions.push(where('type', '==', filters.type));
+    if (filters?.dateFrom) conditions.push(where('createdAt', '>=', new Date(filters.dateFrom)));
+    if (filters?.dateTo) conditions.push(where('createdAt', '<=', new Date(filters.dateTo))); 
+
+    const q = query(widgetsRef, ...conditions);
+    
+    const snapshot = await getDocs(q);
+
+    return {
+      data: snapshot.docs.map(d => ({ widgetId: d.id, ...d.data() })),
+      lastDoc: snapshot.docs[snapshot.docs.length - 1] || null
+    };
+
+    //return collectionData(q, { idField: 'widgetId' })
   }
 
 }

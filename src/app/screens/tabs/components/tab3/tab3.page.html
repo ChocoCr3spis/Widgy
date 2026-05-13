@@ -17,71 +17,78 @@
         </ion-header>
         <ion-content class="ion-padding" [formGroup]="filterPublicWidgetsForm">
           <div class="form">
-            <ion-item>
-              <ion-select formControlName="type" placeholder="Tipo de widget" fill="outline" interface="popover" [multiple]="true">
-                <ion-select-option value="vote">Votación</ion-select-option>
-                <ion-select-option value="image">Imagen</ion-select-option>
-                <ion-select-option value="text">Texto</ion-select-option>
-              </ion-select>
-            </ion-item>
-
-            <ion-item>
-              <ion-label>Fecha desde</ion-label>
-              <ion-datetime-button datetime="dateFrom"></ion-datetime-button>
-            </ion-item>
-            <ion-modal [keepContentsMounted]="true" trigger="dateFrom">
-              <ng-template>
-                <ion-datetime id="dateFrom" presentation="date" (ionChange)="setDate('dateFrom', $event)"></ion-datetime>
-              </ng-template>
-            </ion-modal>
-
-            <ion-item>
-              <ion-label>Fecha hasta</ion-label>
-              <ion-datetime-button datetime="dateTo"></ion-datetime-button>
-            </ion-item>
-            <ion-modal [keepContentsMounted]="true" trigger="dateTo">
-                  <ng-template>
-                    <ion-datetime id="dateTo" presentation="date" (ionChange)="setDate('dateTo', $event)"></ion-datetime>
-              </ng-template>
-            </ion-modal>
-
+            <div class="fechas-row">
+              <ion-item>
+                <ion-label>Fecha desde</ion-label>
+                <ion-datetime-button datetime="dateFrom"></ion-datetime-button>
+              </ion-item>
+              <ion-modal [keepContentsMounted]="true" trigger="dateFrom">
+                <ng-template>
+                  <ion-datetime id="dateFrom" presentation="date" (ionChange)="setDate('dateFrom', $event)"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+              <ion-item>
+                <ion-label>Fecha hasta</ion-label>
+                <ion-datetime-button datetime="dateTo"></ion-datetime-button>
+              </ion-item>
+              <ion-modal [keepContentsMounted]="true" trigger="dateTo">
+                <ng-template>
+                  <ion-datetime id="dateTo" presentation="date" (ionChange)="setDate('dateTo', $event)"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+            </div>
+            <ion-select formControlName="type" placeholder="Tipo de widget" fill="outline" interface="popover" [multiple]="true">
+              <ion-select-option value="vote">Votación</ion-select-option>
+              <ion-select-option value="image">Imagen</ion-select-option>
+              <ion-select-option value="text">Texto</ion-select-option>
+            </ion-select>
             <ion-input label="Nombre del Propietario" labelPlacement="floating" fill="outline" type="text" formControlName="ownerName"></ion-input>
           </div>
         </ion-content>
-        <ion-button class="ion-padding" >Aplicar filtros</ion-button>
+        <ion-button class="ion-padding" (click)="searchWidgets()">Aplicar filtros</ion-button>
       </ng-template>
     </ion-modal>
   </ion-button>
 </ion-toolbar>
 
-@for (widget of widgets; track widget.widgetId) {
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        {{ widget.name }}
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>{{ widget.description }}</p>
-      @if (widget.type === 'text') {
-        <p>
-          {{ widget.data.text }}
-        </p>
-      }
-      @if (widget.type === 'image') {
-        <img [src]="widget.data.imageUrl">
-      }
-      @if (widget.type === 'vote') {
-        <p>{{ widget.data.question }}</p>
-        @for (option of widget.data.options; track option.text) {
+ <ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+ 
+  @for (widget of widgets; track widget.widgetId) {
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          {{ widget.name }}
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ widget.description }}</p>
+        @if (widget.type === 'text') {
           <p>
-            {{ option.text }} - {{ option.votes }}
+            {{ widget.data.text }}
           </p>
         }
-      }
-    </ion-card-content>
-  </ion-card>
-}
+        @if (widget.type === 'image') {
+          <img [src]="widget.data.imageUrl">
+        }
+        @if (widget.type === 'vote') {
+          <p>{{ widget.data.question }}</p>
+          @for (option of widget.data.options; track option.text) {
+            <p>
+              {{ option.text }} - {{ option.votes }}
+            </p>
+          }
+        }
+      </ion-card-content>
+    </ion-card>
+  }
+
+  <ion-infinite-scroll (ionInfinite)="loadWidgets($event)">
+    <ion-infinite-scroll-content loadingText="Cargando ..." loadingSpinner="bubbles"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>
 
 <!--- <ion-header [translucent]="true">
   <ion-toolbar>
