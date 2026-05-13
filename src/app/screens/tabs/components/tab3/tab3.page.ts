@@ -1,13 +1,11 @@
-import { Component } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {  IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonDatetime, IonDatetimeButton, IonFab, IonFabButton, IonIcon, IonItem, IonLabel, IonList, IonInput, IonModal, IonHeader, IonSearchbar, IonSelect, IonSelectOption, IonToolbar, IonTitle } from '@ionic/angular/standalone';
+import { Component, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {  IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonDatetime, IonDatetimeButton, IonFab, IonFabButton, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList, IonInput, IonModal, IonRefresher, IonRefresherContent, IonHeader, IonSearchbar, IonSelect, IonSelectOption, IonToolbar, IonTitle } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../../../explore-container/explore-container.component';
 import { addIcons } from 'ionicons';
 import { filter } from 'ionicons/icons';
 import { WidgetService } from 'src/app/core/services/integrations/widget.service';
 import { Widget } from 'src/app/core/models/widget.interface';
-import { Timestamp } from '@firebase/firestore';
-
 
 @Component({
   selector: 'app-tab3',
@@ -24,9 +22,13 @@ import { Timestamp } from '@firebase/firestore';
     IonDatetime,
     IonDatetimeButton,
     IonIcon,
+    IonInfiniteScroll, 
+    IonInfiniteScrollContent,
     IonItem,
     IonInput,
     IonLabel,
+    IonRefresher,
+    IonRefresherContent,
     IonModal,
     IonHeader, 
     IonSearchbar, 
@@ -43,6 +45,11 @@ export class Tab3Page {
   filterPublicWidgetsForm: FormGroup;
 
    widgets?: Widget[] | any;
+
+   lastWidget: any = null;
+
+  @ViewChild('modalFilter')
+  modalFilter!: IonModal;
 
   constructor(
     private fb: FormBuilder,
@@ -61,18 +68,51 @@ export class Tab3Page {
 
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
-    //this.userId = (await this.userService.getCurrentUser()).uid;
-    this.widgetService.getPublicWidgets({}).subscribe( w => { this.widgets = w });
+    const res = await this.widgetService.getPublicWidgets({});
+    this.widgets = res.data;
+    this.lastWidget = res.lastDoc;
   }
 
-  async createWidget(){
-    await this.widgetService.getPublicWidgets({
-      type: this.filterPublicWidgetsForm.value.type || '',      
+  async refresh(event: any){
+    const res = await this.widgetService.getPublicWidgets({});
+
+    this.widgets = res.data;
+    this.lastWidget = res.lastDoc;
+
+    const infinite = document.querySelector('ion-infinite-scroll');
+    if (infinite) infinite.disabled = false;
+
+    event.target.complete();
+  }
+
+  async searchWidgets(){
+   const res = await this.widgetService.getPublicWidgets({
       dateFrom: this.filterPublicWidgetsForm.value.dateFrom || '',
       dateTo: this.filterPublicWidgetsForm.value.dateTo || '',
       ownerName: this.filterPublicWidgetsForm.value.ownerName || '',
-      test: this.filterPublicWidgetsForm.value.text || '',
+      type: this.filterPublicWidgetsForm.value.type || '',      
     });
+
+    this.widgets = res.data;
+    this.lastWidget = res.lastDoc;
+
+    const infinite = document.querySelector('ion-infinite-scroll');
+    if (infinite) infinite.disabled = false;
+
+    this.modalFilter.dismiss();
+  }
+
+  async loadWidgets(event: any) {
+    const res = await this.widgetService.getPublicWidgets({ lastWidget: this.lastWidget });
+
+    this.widgets = [...this.widgets, ...res.data];
+    this.lastWidget = res.lastDoc;
+
+    event.target.complete();
+
+    if (res.data.length < 4) {
+      event.target.disabled = true;
+    }
   }
 
   setDate(control: string, ev: any) {
