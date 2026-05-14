@@ -39,10 +39,6 @@ import { SearchUsers } from "src/app/shared/search-users/search-users.page";
     IonToggle,
     CommonModule,
     IonChip,
-    IonInfiniteScrollContent,
-    IonInfiniteScroll,
-    IonRefresherContent,
-    IonRefresher,
     SearchUsers
   ],
   providers: [IonModal]
@@ -115,9 +111,7 @@ export class Tab1Page {
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
     this.userId = (await this.userService.getCurrentUser()).uid;
-    let res = await this.widgetService.getMyWidgets({});
-    this.widgets = res.data;
-    this.lastWidget = res.lastDoc;
+    await this.widgetService.getMyWidgets().subscribe(w => { this.widgets = w });
   }
 
   async openShareModal(widget: Widget) {
@@ -261,25 +255,6 @@ export class Tab1Page {
   removeOption(index: number) {
     if (this.opciones.length > 2) {
       this.opciones.removeAt(index);
-    }
-  }
-
-  async refresh(event: any){
-    const res = await this.widgetService.getMyWidgets({});
-    this.widgets = res.data;
-    this.lastWidget = res.lastDoc;
-    const infinite = document.querySelector('ion-infinite-scroll');
-    if (infinite) infinite.disabled = false;
-    event.target.complete();
-  }
-
-  async loadWidgets(event: any) {
-    const res = await this.widgetService.getMyWidgets(this.lastWidget);
-    this.widgets = [...this.widgets, ...res.data];
-    this.lastWidget = res.lastDoc;
-    event.target.complete();
-    if (res.data.length < 4) {
-      event.target.disabled = true;
     }
   }
 }

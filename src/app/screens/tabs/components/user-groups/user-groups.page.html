@@ -1,0 +1,214 @@
+<ion-segment value="first">
+  <ion-segment-button value="first" content-id="first">
+    <ion-label>First</ion-label>
+  </ion-segment-button>
+  <ion-segment-button value="second" content-id="second">
+    <ion-label>Second</ion-label>
+  </ion-segment-button>
+</ion-segment>
+<ion-segment-view>
+  <ion-segment-content id="first">
+    <ion-content>
+      <div class="group-cont">  
+        @for (group of groups; track group.widgetId) {
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title class="group-header">
+                {{ group.name }} 
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p>{{ group.description }}</p>
+              <div class="widget-btns">
+                <ion-chip [outline]="true" color="danger" (click)="deleteWidget(group)">
+                  <ion-icon name="trash" color="danger"></ion-icon>
+                </ion-chip>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+        
+        @if (!groups) {
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+              <br>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+            </ion-card-content>
+          </ion-card>
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+              <br>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+            </ion-card-content>
+          </ion-card>
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+              <br>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+            </ion-card-content>
+          </ion-card>
+        }
+      
+        @if (groups?.length === 0) {
+          <div class="empty-state">
+            <p>No tienes grupos todavía</p>
+          </div>
+        }
+      </div>
+    </ion-content>
+  </ion-segment-content>
+  <ion-segment-content id="second">Second</ion-segment-content>
+</ion-segment-view>
+
+
+<ion-content>
+  <div class="group-cont">  
+    @for (group of groups; track group.widgetId) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title class="group-header">
+            {{ group.name }} 
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>{{ group.description }}</p>
+          <div class="widget-btns">
+            <ion-chip [outline]="true" color="danger" (click)="deleteWidget(group)">
+              <ion-icon name="trash" color="danger"></ion-icon>
+            </ion-chip>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+    
+    @if (!groups) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+    }
+  
+    @if (groups?.length === 0) {
+      <div class="empty-state">
+        <p>No tienes grupos todavía</p>
+      </div>
+    }
+  </div>
+</ion-content>
+
+<ion-fab slot="fixed" vertical="bottom" horizontal="end">
+  <ion-fab-button id="open-modal-create-group">
+    <ion-icon name="add"></ion-icon>
+    <ion-modal #modalCreateGroup trigger="open-modal-create-group" [presentingElement]="presentingElement">
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>Creando grupo...</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="closeModal(modalCreateGroup)">Cancelar</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding" [formGroup]="createGroupForm">
+          <div class="form">
+            <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
+            <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
+            <app-search-users (userSelected)="addUser($event)" [usersForFilter]="addedUsers" [currentUserId]="userId"></app-search-users>
+          </div>
+          <p class="added-users">Usuarios añadidos</p>
+          <div>
+            @for (user of addedUsers; track user.userId) {
+              <ion-item>
+                <ion-avatar slot="start">
+                  <img [src]="user.photoUrl || 'assets/profile/default_profile_image.jpeg'">
+                </ion-avatar>
+                <ion-label>
+                  <h2>{{ user.username }}</h2>
+                  <p>{{ user.email }}</p>
+                </ion-label>
+                @if(user.role == 'editor'){
+                  <ion-chip [outline]="true" >
+                    <ion-icon name="eye-outline" (click)="user.role = 'viewer'"></ion-icon>
+                  </ion-chip>
+                }@else{
+                  <ion-chip [outline]="true" (click)="user.role = 'editor'">
+                    <ion-icon name="pencil-outline"></ion-icon>
+                  </ion-chip>
+                }
+              </ion-item>
+            }
+          </div>
+          @if (addedUsers.length === 0) {
+            <div class="empty-state">
+              <p>No has añadido personas al grupo</p>
+            </div>
+          }
+        </ion-content>
+        <ion-button class="ion-padding" (click)="createGroup(modalCreateGroup)" [disabled]="createGroupForm.invalid || addedUsers.length == 0">Crear</ion-button>
+      </ng-template>
+    </ion-modal>
+  </ion-fab-button>
+</ion-fab>
+
