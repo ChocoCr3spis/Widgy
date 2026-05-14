@@ -4,6 +4,7 @@
    justify-content: space-between;
    gap: 0.1rem;
    margin: 0.25rem;
+   margin-bottom: 3rem;
  }
 
  .widget-header {
@@ -60,4 +61,10 @@
 
 ion-chip > ion-icon {
   margin: 0;
+}
+
+.test {
+  height: 50px;
+  width: 100%;
+  background-color: red;
 }

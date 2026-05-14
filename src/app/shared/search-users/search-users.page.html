@@ -1,0 +1,21 @@
+<div class="search-container">
+  <ion-searchbar placeholder="Buscar usuarios" (ionInput)="onSearch($event)"></ion-searchbar>
+  @if (usersFound.length > 0) {
+    <div class="users-dropdown">
+      @for (user of usersFound; track user.userId) {
+        <ion-item>
+          <ion-avatar slot="start">
+            <img [src]="user.photoUrl || 'assets/profile/default_profile_image.jpeg'">
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ user.username }}</h2>
+            <p>{{ user.email }}</p>
+          </ion-label>
+          <ion-button slot="end" fill="clear">
+            <ion-icon name="person-add-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      }
+    </div>
+  }
+</div>

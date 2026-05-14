@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonIcon, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, ActionSheetController, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea, IonCardHeader, IonCardTitle, IonCardContent, IonToggle, IonChip } from '@ionic/angular/standalone';
+import { IonIcon, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, ActionSheetController, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea, IonCardHeader, IonCardTitle, IonCardContent, IonToggle, IonChip, IonInfiniteScrollContent, IonInfiniteScroll, IonRefresherContent, IonRefresher } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { fileTray, image, text, add, trash, appsOutline, eyeOutline, eyeOffOutline, createOutline, shareSocialOutline } from 'ionicons/icons';
 import { Platform } from '@ionic/angular';
@@ -10,6 +10,7 @@ import { Timestamp } from '@angular/fire/firestore';
 import { WidgetService } from 'src/app/core/services/integrations/widget.service';
 import { Widget } from 'src/app/core/models/widget.interface';
 import { CommonModule } from '@angular/common';
+import { SearchUsers } from "src/app/shared/search-users/search-users.page";
 
 @Component({
   selector: 'app-tab1',
@@ -37,8 +38,13 @@ import { CommonModule } from '@angular/common';
     IonCardContent,
     IonToggle,
     CommonModule,
-    IonChip
-],
+    IonChip,
+    IonInfiniteScrollContent,
+    IonInfiniteScroll,
+    IonRefresherContent,
+    IonRefresher,
+    SearchUsers
+  ],
   providers: [IonModal]
 })
 export class Tab1Page {
@@ -55,6 +61,7 @@ export class Tab1Page {
 
   userId: string = "";
   widgets?: Widget[] | any;
+  lastWidget: any = null;
 
   selectedWidget: Widget | null = null;
   @ViewChild('modalShare')
@@ -108,7 +115,9 @@ export class Tab1Page {
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
     this.userId = (await this.userService.getCurrentUser()).uid;
-    this.widgetService.getMyWidgets().subscribe( w => { this.widgets = w });
+    let res = await this.widgetService.getMyWidgets({});
+    this.widgets = res.data;
+    this.lastWidget = res.lastDoc;
   }
 
   async openShareModal(widget: Widget) {
@@ -252,6 +261,25 @@ export class Tab1Page {
   removeOption(index: number) {
     if (this.opciones.length > 2) {
       this.opciones.removeAt(index);
+    }
+  }
+
+  async refresh(event: any){
+    const res = await this.widgetService.getMyWidgets({});
+    this.widgets = res.data;
+    this.lastWidget = res.lastDoc;
+    const infinite = document.querySelector('ion-infinite-scroll');
+    if (infinite) infinite.disabled = false;
+    event.target.complete();
+  }
+
+  async loadWidgets(event: any) {
+    const res = await this.widgetService.getMyWidgets(this.lastWidget);
+    this.widgets = [...this.widgets, ...res.data];
+    this.lastWidget = res.lastDoc;
+    event.target.complete();
+    if (res.data.length < 4) {
+      event.target.disabled = true;
     }
   }
 }

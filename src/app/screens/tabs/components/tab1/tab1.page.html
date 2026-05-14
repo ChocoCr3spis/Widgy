@@ -1,112 +1,121 @@
-
-<div class="my-widgets-cont">  
-  @for (widget of widgets; track widget.widgetId) {
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title class="widget-header">
-          {{ widget.name }} 
-          @if(widget.visibility == 'public'){
-            <ion-chip [outline]="true" (click)="changeVisivility('private', widget.widgetId)">
-              <ion-icon name="eye-outline"></ion-icon>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+ 
+  <div class="my-widgets-cont">  
+    @for (widget of widgets; track widget.widgetId) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title class="widget-header">
+            {{ widget.name }} 
+            @if(widget.visibility == 'public'){
+              <ion-chip [outline]="true" (click)="changeVisivility('private', widget.widgetId)">
+                <ion-icon name="eye-outline"></ion-icon>
+              </ion-chip>
+            }@else{
+              <ion-chip [outline]="true" (click)="changeVisivility('public', widget.widgetId)">
+                <ion-icon name="eye-off-outline"></ion-icon>
+              </ion-chip>
+            }
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>{{ widget.description }}</p>
+          @switch (widget.type) {
+            @case ('text') {
+              <p>{{ widget.data.text }}</p>
+            }
+            @case ('image') {
+              <img [src]="widget.data.imageUrl">
+            }
+            @case ('vote') {
+              <p>{{ widget.data.question }}</p>
+              <div class="vote-options">
+                @for (
+                  option of widget.data.options;
+                  track option.text
+                ) {
+                  <ion-chip>
+                    {{ option.text }}
+                    ({{ option.votes }})
+                  </ion-chip>
+                }
+              </div>
+            }
+          }
+          <div class="widget-btns">
+            <ion-chip [outline]="true" color="danger" (click)="deleteWidget(widget)">
+              <ion-icon name="trash" color="danger"></ion-icon>
             </ion-chip>
-          }@else{
-            <ion-chip [outline]="true" (click)="changeVisivility('public', widget.widgetId)">
-              <ion-icon name="eye-off-outline"></ion-icon>
+            <ion-chip (click)="openShareModal(widget)" [outline]="true" color="primary">
+              <ion-icon name="share-social-outline" color="primary"></ion-icon>
             </ion-chip>
-          }
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <p>{{ widget.description }}</p>
-        @switch (widget.type) {
-          @case ('text') {
-            <p>{{ widget.data.text }}</p>
-          }
-          @case ('image') {
-            <img [src]="widget.data.imageUrl">
-          }
-          @case ('vote') {
-            <p>{{ widget.data.question }}</p>
-            <div class="vote-options">
-              @for (
-                option of widget.data.options;
-                track option.text
-              ) {
-                <ion-chip>
-                  {{ option.text }}
-                  ({{ option.votes }})
-                </ion-chip>
-              }
-            </div>
-          }
-        }
-        <div class="widget-btns">
-          <ion-chip [outline]="true" color="danger" (click)="deleteWidget(widget)">
-            <ion-icon name="trash" color="danger"></ion-icon>
-          </ion-chip>
-          <ion-chip (click)="openShareModal(widget)" [outline]="true" color="primary">
-            <ion-icon name="share-social-outline" color="primary"></ion-icon>
-          </ion-chip>
-          <ion-chip (click)="openEditModal(widget)" [outline]="true">
-            <ion-icon name="create-outline"></ion-icon>
-          </ion-chip>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  }
+            <ion-chip (click)="openEditModal(widget)" [outline]="true">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-chip>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+    
+    @if (!widgets) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+    }
   
-  @if (!widgets) {
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
-        <br>
-        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
-        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
-        <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
-      </ion-card-content>
-    </ion-card>
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
-        <br>
-        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
-        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
-        <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
-      </ion-card-content>
-    </ion-card>
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
-        <br>
-        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
-        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
-        <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
-      </ion-card-content>
-    </ion-card>
-  }
+    @if (widgets?.length === 0) {
+      <div class="empty-state">
+        <ion-icon name="apps-outline"></ion-icon>
+        <p>No tienes widgets todavía</p>
+      </div>
+    }
+  </div>
 
-  @if (widgets?.length === 0) {
-    <div class="empty-state">
-      <ion-icon name="apps-outline"></ion-icon>
-      <p>No tienes widgets todavía</p>
-    </div>
-  }
-</div>
+  <ion-infinite-scroll (ionInfinite)="loadWidgets($event)">
+    <ion-infinite-scroll-content loadingText="Cargando ..." loadingSpinner="bubbles"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>
 
 <ion-fab slot="fixed" vertical="bottom" horizontal="end">
   <ion-fab-button>
@@ -228,6 +237,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
+      <app-search-users></app-search-users>
       
     </ion-content>
   </ng-template>

@@ -19,12 +19,22 @@ export class WidgetService {
     return addDoc(widgetsRef, widget);
   }
 
-  getMyWidgets() {
+  async getMyWidgets(lastWidget: any) {
+    console.log(lastWidget)
     const uid = this.auth.currentUser?.uid;
-    console.log(uid)
     const widgetsRef = collection(this.firestore, 'widgets');
-    const q = query(widgetsRef, where('ownerId', '==', uid));
-    return collectionData(q, { idField: 'widgetId' })
+    const conditions: QueryConstraint[] = [
+      where('ownerId', '==', uid),
+      orderBy('createdAt', 'desc'),
+      limit(4),
+      startAfter(lastWidget)
+    ];
+    const q = query(widgetsRef, ...conditions);
+    const snapshot = await getDocs(q);
+    return {
+      data: snapshot.docs.map(d => ({ widgetId: d.id, ...d.data() })),
+      lastDoc: snapshot.docs[snapshot.docs.length - 1] || null
+    };
   }
 
   async changeVisivility(visibility: string, widgetId: string){
@@ -57,11 +67,12 @@ export class WidgetService {
       orderBy('createdAt', 'desc'),
       limit(4),
     ];
-
+    debugger
     if (filters?.lastWidget) conditions.push(startAfter(filters.lastWidget));
     if (filters?.type) conditions.push(where('type', '==', filters.type));
     if (filters?.dateFrom) conditions.push(where('createdAt', '>=', new Date(filters.dateFrom)));
     if (filters?.dateTo) conditions.push(where('createdAt', '<=', new Date(filters.dateTo))); 
+    console.log(filters.lastWidget)
 
     const q = query(widgetsRef, ...conditions);
     

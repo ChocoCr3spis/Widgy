@@ -44,9 +44,9 @@ export class Tab3Page {
 
   filterPublicWidgetsForm: FormGroup;
 
-   widgets?: Widget[] | any;
+  widgets?: Widget[] | any;
 
-   lastWidget: any = null;
+  lastWidget: any = null;
 
   @ViewChild('modalFilter')
   modalFilter!: IonModal;
