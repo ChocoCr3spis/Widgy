@@ -1,7 +1,10 @@
 <ion-toolbar>
-  <ion-searchbar
-    placeholder="Buscar texto o descripción..."
-  ></ion-searchbar>
+  <div>
+    <ion-searchbar
+      placeholder="Buscar texto o descripción..."
+   >
+    </ion-searchbar>
+  </div>
 
   <ion-button id="open-modal-filter" slot="end" fill="clear">
     <ion-icon name="filter" ></ion-icon>
@@ -17,26 +20,40 @@
         </ion-header>
         <ion-content class="ion-padding" [formGroup]="filterPublicWidgetsForm">
           <div class="form">
-            <div class="fechas-row">
               <ion-item>
                 <ion-label>Fecha desde</ion-label>
-                <ion-datetime-button datetime="dateFrom"></ion-datetime-button>
+                <ion-datetime-button id="dateFromBtn" datetime="dateFrom"></ion-datetime-button>
+                <ion-button fill="clear" (click)="clearDate('dateFrom')">
+                  <ion-icon name="trash" ></ion-icon>
+                </ion-button>
               </ion-item>
-              <ion-modal [keepContentsMounted]="true" trigger="dateFrom">
+              <ion-modal [keepContentsMounted]="true" trigger="dateFromBtn">
                 <ng-template>
-                  <ion-datetime id="dateFrom" presentation="date" (ionChange)="setDate('dateFrom', $event)"></ion-datetime>
+                  <ion-datetime 
+                    id="dateFrom" 
+                    presentation="date" 
+                    (ionChange)="setDate('dateFrom', $event)"
+                    [value]="filterPublicWidgetsForm.value.dateFrom || null">
+                  </ion-datetime>
                 </ng-template>
               </ion-modal>
               <ion-item>
                 <ion-label>Fecha hasta</ion-label>
-                <ion-datetime-button datetime="dateTo"></ion-datetime-button>
+                <ion-datetime-button id="dateToBtn" datetime="dateTo"></ion-datetime-button>
+                <ion-button fill="clear" (click)="clearDate('dateTo')">
+                  <ion-icon name="trash"></ion-icon>
+                </ion-button>
               </ion-item>
-              <ion-modal [keepContentsMounted]="true" trigger="dateTo">
+              <ion-modal [keepContentsMounted]="true" trigger="dateToBtn">
                 <ng-template>
-                  <ion-datetime id="dateTo" presentation="date" (ionChange)="setDate('dateTo', $event)"></ion-datetime>
+                  <ion-datetime 
+                    id="dateTo" 
+                    presentation="date" 
+                    (ionChange)="setDate('dateTo', $event)"
+                    [value]="filterPublicWidgetsForm.value.dateTo || null">
+                  </ion-datetime>
                 </ng-template>
               </ion-modal>
-            </div>
             <ion-select formControlName="type" placeholder="Tipo de widget" fill="outline" interface="popover" [multiple]="true">
               <ion-select-option value="vote">Votación</ion-select-option>
               <ion-select-option value="image">Imagen</ion-select-option>
