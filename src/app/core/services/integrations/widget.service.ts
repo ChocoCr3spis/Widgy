@@ -23,7 +23,7 @@ export class WidgetService {
     const uid = this.auth.currentUser?.uid;
     console.log(uid)
     const widgetsRef = collection(this.firestore, 'widgets');
-    const q = query(widgetsRef, where('ownerId', '==', uid));
+    const q = query(widgetsRef, where('ownerId', '==', uid), orderBy('createdAt', 'desc'));
     return collectionData(q, { idField: 'widgetId' })
   }
 

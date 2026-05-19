@@ -22,6 +22,11 @@ export const routes: Routes = [
           import('./components/tab3/tab3.page').then((m) => m.Tab3Page),
       },
       {
+        path: 'user-groups',
+        loadComponent: () =>
+          import('./components/user-groups/user-groups.page').then((m) => m.UserGroups),
+      },
+      {
         path: '',
         redirectTo: '/tabs/tab1',
         pathMatch: 'full',

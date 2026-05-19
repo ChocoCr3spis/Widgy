@@ -2,8 +2,7 @@
    display: flex;
    flex-direction: column;
    justify-content: space-between;
-   gap: 0.1rem;
-   margin: 0.25rem;
+   margin-bottom: 3rem;
  }
 
  .widget-header {
@@ -56,8 +55,4 @@
   display: flex;
   flex-direction: row;
   gap: 0.25rem;
-}
-
-ion-chip > ion-icon {
-  margin: 0;
 }

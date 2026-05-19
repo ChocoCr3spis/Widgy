@@ -49,3 +49,11 @@
 .ion-page {
   justify-content: start;
 }
+
+.empty-state {
+  margin-left: 1rem;
+}
+
+ion-chip > ion-icon {
+  margin: 0;
+}
