@@ -1,9 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {  IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonDatetime, IonDatetimeButton, IonFab, IonFabButton, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList, IonInput, IonModal, IonRefresher, IonRefresherContent, IonHeader, IonSearchbar, IonSelect, IonSelectOption, IonToolbar, IonTitle } from '@ionic/angular/standalone';
-import { ExploreContainerComponent } from '../../../explore-container/explore-container.component';
 import { addIcons } from 'ionicons';
-import { filter } from 'ionicons/icons';
+import { filter, trash } from 'ionicons/icons';
 import { WidgetService } from 'src/app/core/services/integrations/widget.service';
 import { Widget } from 'src/app/core/models/widget.interface';
 
@@ -55,12 +54,12 @@ export class Tab3Page {
     private fb: FormBuilder,
     private widgetService: WidgetService
   ) {
-    addIcons({ filter });
+    addIcons({ filter, trash });
 
     this.filterPublicWidgetsForm = this.fb.group({
-      type: [''],
-      dateFrom: [''],
-      dateTo: [''],
+      type: [[]],
+      dateFrom: [null],
+      dateTo: [null],
       ownerName: [''],
     });
 
@@ -68,13 +67,17 @@ export class Tab3Page {
 
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
+
+    //Carga de datos inicial
     const res = await this.widgetService.getPublicWidgets({});
     this.widgets = res.data;
     this.lastWidget = res.lastDoc;
   }
 
+  //Carga de datos cuando tiras hacia arriba
   async refresh(event: any){
-    const res = await this.widgetService.getPublicWidgets({});
+    const filters = this.filterPublicWidgetsForm.value;
+    const res = await this.widgetService.getPublicWidgets({ ...filters });
 
     this.widgets = res.data;
     this.lastWidget = res.lastDoc;
@@ -85,25 +88,29 @@ export class Tab3Page {
     event.target.complete();
   }
 
+  //Carga de datos cuando filtras
   async searchWidgets(){
-   const res = await this.widgetService.getPublicWidgets({
-      dateFrom: this.filterPublicWidgetsForm.value.dateFrom || '',
-      dateTo: this.filterPublicWidgetsForm.value.dateTo || '',
-      ownerName: this.filterPublicWidgetsForm.value.ownerName || '',
-      type: this.filterPublicWidgetsForm.value.type || '',      
-    });
+    const filters = this.filterPublicWidgetsForm.value;
+
+    const infinite = document.querySelector('ion-infinite-scroll');
+    if (infinite) infinite.disabled = true;
+
+    this.lastWidget = null;
+
+    const res = await this.widgetService.getPublicWidgets({ ...filters });
 
     this.widgets = res.data;
     this.lastWidget = res.lastDoc;
 
-    const infinite = document.querySelector('ion-infinite-scroll');
     if (infinite) infinite.disabled = false;
 
     this.modalFilter.dismiss();
   }
 
+  //Carga de datos cuando haces scroll
   async loadWidgets(event: any) {
-    const res = await this.widgetService.getPublicWidgets({ lastWidget: this.lastWidget });
+    const filters = this.filterPublicWidgetsForm.value;
+    const res = await this.widgetService.getPublicWidgets({ ...filters, lastWidget: this.lastWidget });
 
     this.widgets = [...this.widgets, ...res.data];
     this.lastWidget = res.lastDoc;
@@ -117,15 +124,11 @@ export class Tab3Page {
 
   setDate(control: string, ev: any) {
     const iso = ev.detail.value;
-    this.filterPublicWidgetsForm.get(control)?.setValue(this.formatDate(iso));
+    this.filterPublicWidgetsForm.get(control)?.setValue(iso);
   }
 
-  formatDate(iso: string | null) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    return `${d.getDate().toString().padStart(2, '0')}/${
-      (d.getMonth() + 1).toString().padStart(2, '0')
-    }/${d.getFullYear()}`;
+  clearDate(field: 'dateFrom' | 'dateTo') {
+    this.filterPublicWidgetsForm.patchValue({ [field]: null });
   }
 
 }
