@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
-import { Firestore, collection, collectionData, deleteDoc, doc, orderBy, query, setDoc, where,  } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, deleteDoc, doc, getDocs, orderBy, query, setDoc, where, writeBatch,  } from '@angular/fire/firestore';
 import { Group } from '../../models/group.interface';
+import { updateDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -11,15 +12,50 @@ export class GroupService {
   private firestore = inject(Firestore);
   private auth = inject(Auth);
 
-  getMyGroups(){
+  // async getMyGroups() {
+  //   const uid = this.auth.currentUser?.uid;
+  //   const groupsRef = collection(this.firestore, 'groups');
+  //   const q = query(groupsRef, where('ownerId', '==', uid), orderBy('createdAt', 'desc'));
+  //   const snapshot = await getDocs(q);
+  //   const groups = await Promise.all(snapshot.docs.map(async docSnap => {
+  //       const groupData = { groupId: docSnap.id,...docSnap.data() };
+  //       const membersRef = collection(this.firestore,`groups/${docSnap.id}/members`);
+  //       const membersSnapshot = await getDocs(membersRef);
+  //       const members = membersSnapshot.docs.map(m => m.data());
+  //       return {...groupData, members};
+  //     })
+  //   );
+  //   return groups;
+  // }
+
+  getMyGroups() {
     const uid = this.auth.currentUser?.uid;
     const groupsRef = collection(this.firestore, 'groups');
     const q = query(groupsRef, where('ownerId', '==', uid), orderBy('createdAt', 'desc'));
-    return collectionData(q, { idField: 'groupId' })
+    return collectionData(q, { idField: 'groupId' });
   }
 
-  async createGroup(group: Group) {
-    await setDoc(doc(this.firestore, 'groups'), group);
+  async getMyGroupsUsers(groupId: string){
+    const usersRef = collection(this.firestore, `groups/${groupId}/members`);
+    const q = query(usersRef);
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ userId: doc.id, ...doc.data()}))
+  }
+
+  changeUserRole(role: string, userId: string, groupId: string){
+    const userRef = doc(this.firestore, `groups/${groupId}/members/${userId}`);
+    updateDoc(userRef, { role: role })
+  }
+
+  async createGroup(group: any, users: any[]) {
+    const groupRef = doc(collection(this.firestore, 'groups'));
+    const batch = writeBatch(this.firestore);
+    batch.set(groupRef, { ...group });
+    users.forEach(user => {
+      const memberRef = doc(this.firestore,`groups/${groupRef.id}/members/${user.userId}`);
+      batch.set(memberRef, { userId: user.userId, role: user.role, email: user.email, username: user.username, state: 'pending' });
+    });
+    await batch.commit();
   }
 
   deleteGroup(groupId: string){

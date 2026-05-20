@@ -57,3 +57,8 @@
 ion-chip > ion-icon {
   margin: 0;
 }
+
+:host ::ng-deep .item-inner {
+  border-bottom: none !important;
+  background-color: rebeccapurple !important;
+}

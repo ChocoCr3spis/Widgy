@@ -55,13 +55,14 @@ export class UserGroups {
   userId: string = "";
   groups?: Group[] | any;
 
-  // selectedWidget: Widget | null = null;
+  selectedGroup: Group | null = null;
+  selectedGroupUsers: any[] = [];
 
   @ViewChild('modalCreateGroup')
   modalCreateGroup!: IonModal;
   
-  // @ViewChild('modalEdit')
-  // modalEdit!: IonModal;
+  @ViewChild('modalEditGroup')
+  modalEdit!: IonModal;
 
   constructor(
     private fb: FormBuilder,
@@ -80,17 +81,26 @@ export class UserGroups {
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
     this.userId = (await this.userService.getCurrentUser()).uid;
-    this.groupService.getMyGroups().subscribe(g => { this.groups = g });
+    this.getGroups();
+  }
+
+  getGroups(){
+    this.groupService.getMyGroups().subscribe(g => this.groups = g);
   }
 
   async openCreateGroupModal() {
     await this.modalCreateGroup.present();
   }
 
-  // async openEditModal(widget: Widget){
-  //   this.selectedWidget = widget;
-  //   await this.modalEdit.present();
-  // }
+  async openEditModal(group: Group){
+    this.selectedGroup = group;
+    this.createGroupForm.patchValue({
+      nombre: this.selectedGroup.name,
+      descripcion: this.selectedGroup.description
+    })
+    this.selectedGroupUsers = await this.groupService.getMyGroupsUsers(group.groupId!);
+    await this.modalEdit.present();
+  }
 
   closeModal(modal: any){
     this.createGroupForm.reset();
@@ -102,19 +112,39 @@ export class UserGroups {
     this.addedUsers.push({email: event.email, userId: event.userId, username: event.username, usernameLower: event.usernameLower, role: 'viewer'})
   }
 
+  deleteUser(user: any){
+    this.addedUsers = this.addedUsers.filter(u => u.userId != user.userId)
+  }
+
+  changeRole(role: string, userId: string){
+    this.groupService.changeUserRole(role, userId, this.selectedGroup?.groupId!);
+  }
+
   async createGroup(modal: any){
     await this.groupService.createGroup({
       ownerId: this.userId,
       name: this.createGroupForm.value.nombre!,
       description: this.createGroupForm.value.descripcion  || '',
-      createdAt: Timestamp.now(),
-      sharedWith: [],
-    });
+      createdAt: Timestamp.now()
+    }, this.addedUsers );
     this.createGroupForm.reset();
     this.closeModal(modal);
+    this.getGroups();
   }
 
-  async deleteWidget(group: Group){
-    await this.groupService.deleteGroup(group.groupId!);
+  async deleteGroup(group: Group){
+    try{
+      await this.groupService.deleteGroup(group.groupId!);
+      // this.groups = this.groups.filter((g: { groupId: string | undefined; }) => g.groupId != group.groupId);
+    }catch(err){}
+  }
+
+  async deleteUserFromGroup(group: Group, userId: any){
+    try{
+      // await this.groupService.deleteGroup(group.groupId!);
+      // this.groups = this.groups.filter((g: { groupId: string | undefined; }) => g.groupId != group.groupId);
+      console.log(this.groups[this.groups.indexOf(group)].members)
+      this.groups[this.groups.indexOf(group)].members = this.groups[this.groups.indexOf(group)].members.filter((m: { userId: any; }) => m.userId != userId);
+    }catch(err){}
   }
 }

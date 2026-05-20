@@ -15,16 +15,51 @@
             <ion-card-header>
               <ion-card-title class="group-header">
                 {{ group.name }} 
+                <ion-chip [outline]="true" color="danger" (click)="deleteGroup(group)">
+                  <ion-icon name="trash" color="danger"></ion-icon>
+                </ion-chip>
               </ion-card-title>
             </ion-card-header>
             <ion-card-content>
               <p>{{ group.description }}</p>
-              <div class="widget-btns">
-                <ion-chip [outline]="true" color="danger" (click)="deleteWidget(group)">
-                  <ion-icon name="trash" color="danger"></ion-icon>
-                </ion-chip>
-              </div>
             </ion-card-content>
+            <!-- <ion-card-content>
+              <div>
+                @for (user of group.members; track user.userId) {
+                  <ion-item class="user">
+                    <ion-avatar slot="start">
+                      <img [src]="user.photoUrl || 'assets/profile/default_profile_image.jpeg'">
+                    </ion-avatar>
+                    <ion-label>
+                      <h2>{{ user.username }}</h2>
+                      <p>{{ user.email }}</p>
+                    </ion-label>
+                    <ion-chip [outline]="true" color="danger" (click)="deleteUserFromGroup(group, user.userId)">
+                      <ion-icon name="trash" color="danger"></ion-icon>
+                    </ion-chip>
+                    @if(user.role == 'editor'){
+                      <ion-chip [outline]="true" >
+                        <ion-icon name="eye-outline" (click)="user.role = 'viewer'"></ion-icon>
+                      </ion-chip>
+                    }@else{
+                      <ion-chip [outline]="true" (click)="user.role = 'editor'">
+                        <ion-icon name="pencil-outline"></ion-icon>
+                      </ion-chip>
+                    }
+                  </ion-item>
+                }
+              </div>
+              @if (group.members.length === 0) {
+                <div class="empty-state">
+                  <p>No has añadido personas al grupo</p>
+                </div>
+              }
+            </ion-card-content> -->
+            <div class="group-btns">
+              <ion-chip id="open-modal-edit-group" (click)="openEditModal(group)" [outline]="true">
+                <ion-icon name="create-outline"></ion-icon>
+              </ion-chip>
+            </div>
           </ion-card>
         }
         
@@ -96,8 +131,8 @@
         </ion-card-header>
         <ion-card-content>
           <p>{{ group.description }}</p>
-          <div class="widget-btns">
-            <ion-chip [outline]="true" color="danger" (click)="deleteWidget(group)">
+          <div class="group-btns">
+            <ion-chip [outline]="true" color="danger" (click)="deleteGroup(group)">
               <ion-icon name="trash" color="danger"></ion-icon>
             </ion-chip>
           </div>
@@ -188,13 +223,16 @@
                   <h2>{{ user.username }}</h2>
                   <p>{{ user.email }}</p>
                 </ion-label>
+                <ion-chip [outline]="true" color="danger" (click)="deleteUser(user)">
+                  <ion-icon name="trash" color="danger"></ion-icon>
+                </ion-chip>
                 @if(user.role == 'editor'){
-                  <ion-chip [outline]="true" >
-                    <ion-icon name="eye-outline" (click)="user.role = 'viewer'"></ion-icon>
+                  <ion-chip [outline]="true" (click)="user.role = 'viewer'">
+                    <ion-icon name="pencil-outline"></ion-icon>
                   </ion-chip>
                 }@else{
-                  <ion-chip [outline]="true" (click)="user.role = 'editor'">
-                    <ion-icon name="pencil-outline"></ion-icon>
+                  <ion-chip [outline]="true" >
+                    <ion-icon name="eye-outline" (click)="user.role = 'editor'"></ion-icon>
                   </ion-chip>
                 }
               </ion-item>
@@ -211,4 +249,57 @@
     </ion-modal>
   </ion-fab-button>
 </ion-fab>
+
+
+<ion-modal #modalEditGroup trigger="open-modal-edit-group" [presentingElement]="presentingElement">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Editando grupo...</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal(modalEditGroup)">Cancelar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding" [formGroup]="createGroupForm">
+      <div class="form">
+        <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
+        <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
+        <app-search-users (userSelected)="addUser($event)" [usersForFilter]="addedUsers" [currentUserId]="userId"></app-search-users>
+      </div>
+      <p class="added-users">Usuarios añadidos</p>
+      <div>
+        @for (user of selectedGroupUsers; track user.userId) {
+          <ion-item>
+            <ion-avatar slot="start">
+              <img [src]="user.photoUrl || 'assets/profile/default_profile_image.jpeg'">
+            </ion-avatar>
+            <ion-label>
+              <h2>{{ user.username }}</h2>
+              <p>{{ user.email }}</p>
+            </ion-label>
+            <ion-chip [outline]="true" color="danger" (click)="deleteUser(user)">
+              <ion-icon name="trash" color="danger"></ion-icon>
+            </ion-chip>
+            @if(user.role == 'editor'){
+              <ion-chip [outline]="true" (click)="changeRole('viewer', user.userId)">
+                <ion-icon name="pencil-outline"></ion-icon>
+              </ion-chip>
+            }@else{
+              <ion-chip [outline]="true" >
+                <ion-icon name="eye-outline" (click)="changeRole('editor', user.userId)"></ion-icon>
+              </ion-chip>
+            }
+          </ion-item>
+        }
+      </div>
+      @if (selectedGroupUsers.length === 0) {
+        <div class="empty-state">
+          <p>No has añadido personas al grupo</p>
+        </div>
+      }
+    </ion-content>
+    <ion-button class="ion-padding" (click)="createGroup(modalEditGroup)" [disabled]="createGroupForm.invalid || addedUsers.length == 0">Crear</ion-button>
+  </ng-template>
+</ion-modal>
 

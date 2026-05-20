@@ -44,13 +44,12 @@ export class SearchUsers {
       return;
     }
     this.userService.searchUsers(value).subscribe(users => {
-      // this.usersFound = users.filter(u => !this.usersForFilter.some(user => user.userId === u.userId) && !(u.userId === this.currentUserId))
-      this.usersFound = users;
+      this.usersFound = users.filter(u => !this.usersForFilter.some(user => user.userId === u.userId) && !(u.userId === this.currentUserId))
     });
   }
 
   emitUser(user: any){
-    // this.usersFound = this.usersFound.filter(u => u != user);
+    this.usersFound = this.usersFound.filter(u => u != user);
     this.userSelected.emit(user)
   }
 }
