@@ -148,11 +148,9 @@
                   </div>
                 }
               </div>
-
               <ion-button class="ion-padding" expand="block" fill="outline" (click)="addOption()">
                 + Añadir opción
               </ion-button>
-
             </div>
           </ion-content>
           <ion-button class="ion-padding" (click)="createWidget('vote', modalVote)" [disabled]="voteWidgetForm.invalid">Crear</ion-button>
@@ -239,7 +237,7 @@
       <ion-toolbar>
         <ion-title>Editando widget...</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeModal('modalShare', modalEdit)">Cancelar</ion-button>
+          <ion-button (click)="closeModal(selectedWidget?.type!, modalEdit)">Cancelar</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -298,6 +296,17 @@
         }
       }
     </ion-content>
+    @switch (selectedWidget?.type) {
+        @case ('image') {
+          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="imgWidgetForm.invalid || (!imageFile && imgWidgetForm.pristine)">Guardar</ion-button>
+        }
+        @case ('vote') {
+          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="voteWidgetForm.invalid || voteWidgetForm.pristine">Guardar</ion-button>
+        }
+        @case ('text') {
+          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="textWidgetForm.invalid || textWidgetForm.pristine">Guardar</ion-button>
+        }
+    }
   </ng-template>
 </ion-modal>
 

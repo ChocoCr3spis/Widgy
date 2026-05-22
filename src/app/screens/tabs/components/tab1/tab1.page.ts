@@ -111,7 +111,7 @@ export class Tab1Page {
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
     this.userId = (await this.userService.getCurrentUser()).uid;
-    await this.widgetService.getMyWidgets().subscribe(w => { this.widgets = w });
+    this.widgetService.getMyWidgets().subscribe(w => { this.widgets = w });
   }
 
   async openShareModal(widget: Widget) {
@@ -119,8 +119,46 @@ export class Tab1Page {
     await this.modalShare.present();
   }
 
-  async openEditModal(widget: Widget){
+  async openEditModal(widget: Widget) {
+    console.log(widget);
     this.selectedWidget = widget;
+    switch(widget.type){
+      case 'vote':
+        this.voteWidgetForm.reset();
+        this.opciones.clear();
+        widget.data.options.forEach((option: any) => {
+          this.opciones.push(
+            this.fb.control(option.text, Validators.required)
+          );
+        });
+        this.voteWidgetForm.patchValue({
+          nombre: widget.name,
+          descripcion: widget.description,
+          pregunta: widget.data.question,
+          public: widget.visibility === 'public'
+        });
+        break;
+      case 'img':
+      case 'image':
+        this.imgWidgetForm.reset();
+        this.imgWidgetForm.patchValue({
+          nombre: widget.name,
+          descripcion: widget.description,
+          public: widget.visibility === 'public'
+        });
+        this.imageFile = null;
+        this.imagePreview = null;
+        this.imagePreview = widget.data.imageUrl || null;
+        break;
+      case 'text':
+        this.textWidgetForm.patchValue({
+          nombre: widget.name,
+          descripcion: widget.description,
+          text: widget.data.text,
+          public: widget.visibility === 'public'
+        });
+        break;
+    }
     await this.modalEdit.present();
   }
 
@@ -128,9 +166,12 @@ export class Tab1Page {
     switch(widgetType){
       case 'vote':
         this.voteWidgetForm.reset();
-        this.opciones.reset();
+        while(this.opciones.length !== 2){
+          this.opciones.removeAt(0);
+        }
         break;
       case 'img':
+      case 'image':
         this.imgWidgetForm.reset();
         this.imageFile = null;
         this.imagePreview = null;
@@ -192,6 +233,44 @@ export class Tab1Page {
         break;
     }
     this.closeModal(widgetType, modal);
+  }
+
+  async saveWidget(modal: any){
+    switch(this.selectedWidget?.type){
+      case 'vote':
+        const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({text: option,votes: 0}));
+        await this.widgetService.createWidget({
+          visibility: this.voteWidgetForm.value.public ? 'public' : 'private',
+          name: this.voteWidgetForm.value.nombre!,
+          description: this.voteWidgetForm.value.descripcion  || '',
+          data: {
+            question: this.voteWidgetForm.value.pregunta,
+            options: options
+          }
+        });
+        this.voteWidgetForm.reset();
+        break;
+      case 'img':
+        await this.widgetService.createImageWidget({
+          visibility: this.imgWidgetForm.value.public ? 'public' : 'private',
+          name: this.imgWidgetForm.value.nombre!,
+          description: this.imgWidgetForm.value.descripcion || '',
+        }, this.imageFile);
+        this.imgWidgetForm.reset();
+        break;
+      case 'text':
+        await this.widgetService.createWidget({
+          visibility: this.textWidgetForm.value.public ? 'public' : 'private',
+          name: this.textWidgetForm.value.nombre!,
+          description: this.textWidgetForm.value.descripcion || '',
+          data: {
+            text: this.textWidgetForm.value.text
+          }
+        });
+        this.textWidgetForm.reset();
+        break;
+    }
+    this.closeModal(this.selectedWidget?.type!, modal);
   }
 
   async changeVisivility(visibility: string, widgetId: string){

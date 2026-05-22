@@ -14,7 +14,7 @@ export class WidgetService {
   private auth = inject(Auth);
   private storage = inject(Storage);
 
-  async createWidget(widget: Widget) {
+  async createWidget(widget: any) {
     const widgetsRef = collection(this.firestore, 'widgets');
     return addDoc(widgetsRef, widget);
   }
