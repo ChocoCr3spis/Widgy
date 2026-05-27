@@ -301,7 +301,7 @@
           <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="imgWidgetForm.invalid || (!imageFile && imgWidgetForm.pristine)">Guardar</ion-button>
         }
         @case ('vote') {
-          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="voteWidgetForm.invalid || voteWidgetForm.pristine">Guardar</ion-button>
+          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="voteWidgetForm.invalid || voteWidgetForm.pristine && (selectedWidget?.data.options!.length == opciones.length)">Guardar</ion-button>
         }
         @case ('text') {
           <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="textWidgetForm.invalid || textWidgetForm.pristine">Guardar</ion-button>

@@ -239,6 +239,7 @@ export class Tab1Page {
     switch(this.selectedWidget?.type){
       case 'vote':
         const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({text: option,votes: 0}));
+        console.log(options)
         await this.widgetService.createWidget({
           visibility: this.voteWidgetForm.value.public ? 'public' : 'private',
           name: this.voteWidgetForm.value.nombre!,
