@@ -1,6 +1,7 @@
 .header {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .profile-img {
@@ -23,4 +24,15 @@
 
 .line {
   border-bottom: 1px solid #363636;
+}
+
+.notification-btn::part(native) {
+  width: 50px;
+  height: 50px;
+  padding: 1rem;
+}
+
+.notification-btn {
+  display: flex;
+  justify-content: center;
 }

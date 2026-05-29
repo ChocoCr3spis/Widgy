@@ -50,6 +50,5 @@ export class AuthService {
   async logout() {
     sessionStorage.clear();
     await signOut(this.auth);
-    this.router.navigateByUrl('/auth/login')
   }
 }

@@ -153,7 +153,13 @@
               </ion-button>
             </div>
           </ion-content>
-          <ion-button class="ion-padding" (click)="createWidget('vote', modalVote)" [disabled]="voteWidgetForm.invalid">Crear</ion-button>
+          @if(!saving){
+            <ion-button class="ion-padding" (click)="createWidget('vote', modalVote)" [disabled]="voteWidgetForm.invalid">Crear</ion-button>
+          }@else {
+            <ion-button [className]="'ion-padding loading-btn'" [disabled]="true">
+              <ion-spinner name="crescent"></ion-spinner>
+            </ion-button>
+          }
         </ng-template>
       </ion-modal>
     </ion-fab-button>
@@ -183,7 +189,13 @@
               </div>
             </div>
           </ion-content>
-          <ion-button class="ion-padding" (click)="createWidget('img', modalImage)" [disabled]="imgWidgetForm.invalid || !imageFile">Crear</ion-button>
+          @if(!saving){
+            <ion-button class="ion-padding" (click)="createWidget('img', modalImage)" [disabled]="imgWidgetForm.invalid || !imageFile">Crear</ion-button>
+          }@else{
+            <ion-button [className]="'ion-padding loading-btn'" [disabled]="true">
+              <ion-spinner name="crescent"></ion-spinner>
+            </ion-button>
+          }
         </ng-template>
       </ion-modal>
     </ion-fab-button>
@@ -208,7 +220,13 @@
               <ion-textarea label="Texto" labelPlacement="floating" fill="outline" placeholder="Enter text" formControlName="text" [counter]="true" [autoGrow]="true" maxlength="250"></ion-textarea>
             </div>
           </ion-content>
-          <ion-button class="ion-padding" (click)="createWidget('text', modalText)" [disabled]="textWidgetForm.invalid">Crear</ion-button>
+          @if(!saving){
+            <ion-button class="ion-padding" (click)="createWidget('text', modalText)" [disabled]="textWidgetForm.invalid">Crear</ion-button>
+          }@else {
+            <ion-button [className]="'ion-padding loading-btn'" [disabled]="true">
+              <ion-spinner name="crescent"></ion-spinner>
+            </ion-button>
+          }
         </ng-template>
       </ion-modal>
     </ion-fab-button>
@@ -225,8 +243,54 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
-      <app-search-users [currentUserId]="this.userId"></app-search-users>
+    <ion-content>
+      <ion-segment [(ngModel)]="selectedTab">
+        <ion-segment-button value="users">
+          <ion-label>Usuarios</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="groups">
+          <ion-label>Grupos</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+      <div class="ion-padding">
+        @if(selectedTab === 'users'){
+          <app-search-users  [usersForFilter]="selectedWidgetSharedWith!" [currentUserId]="this.user.uid" (userSelected)="sendInvitation($event)"></app-search-users>
+          <p class="shared-with">Compartido con:</p>
+          <div>
+            @for (user of selectedWidgetSharedWith; track user.userId) {
+              <ion-item>
+                <ion-avatar slot="start">
+                  <img [src]="user.photoUrl || 'assets/profile/default_profile_image.jpeg'">
+                </ion-avatar>
+                <ion-label>
+                  <h2>{{ user.username }}</h2>
+                  <p>{{ user.email }}</p>
+                </ion-label>
+                <ion-chip [outline]="true" color="danger" (click)="deleteInvitation(user)">
+                  <ion-icon name="trash" color="danger"></ion-icon>
+                </ion-chip>
+                @if(user.role == 'editor'){
+                  <ion-chip [outline]="true" (click)="changeRole(user, 'viewer')">
+                    <ion-icon name="pencil-outline"></ion-icon>
+                  </ion-chip>
+                }@else{
+                  <ion-chip [outline]="true" >
+                    <ion-icon name="eye-outline" (click)="changeRole(user, 'editor')"></ion-icon>
+                  </ion-chip>
+                }
+              </ion-item>
+            }
+          </div>
+          @if (selectedWidgetSharedWith?.length === 0) {
+            <div class="empty-state">
+              <p>No has compartido este wiget aún</p>
+            </div>
+          }
+        }
+        @else{
+          contenido grupos
+        }
+      </div>
     </ion-content>
   </ng-template>
 </ion-modal>
@@ -296,7 +360,8 @@
         }
       }
     </ion-content>
-    @switch (selectedWidget?.type) {
+    @if(!saving){
+      @switch (selectedWidget?.type) {
         @case ('image') {
           <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="imgWidgetForm.invalid || (!imageFile && imgWidgetForm.pristine)">Guardar</ion-button>
         }
@@ -306,6 +371,11 @@
         @case ('text') {
           <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="textWidgetForm.invalid || textWidgetForm.pristine">Guardar</ion-button>
         }
+    }
+    }@else {
+      <ion-button [className]="'ion-padding loading-btn'" [disabled]="true">
+        <ion-spinner name="crescent"></ion-spinner>
+      </ion-button>
     }
   </ng-template>
 </ion-modal>

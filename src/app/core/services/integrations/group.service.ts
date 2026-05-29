@@ -12,22 +12,6 @@ export class GroupService {
   private firestore = inject(Firestore);
   private auth = inject(Auth);
 
-  // async getMyGroups() {
-  //   const uid = this.auth.currentUser?.uid;
-  //   const groupsRef = collection(this.firestore, 'groups');
-  //   const q = query(groupsRef, where('ownerId', '==', uid), orderBy('createdAt', 'desc'));
-  //   const snapshot = await getDocs(q);
-  //   const groups = await Promise.all(snapshot.docs.map(async docSnap => {
-  //       const groupData = { groupId: docSnap.id,...docSnap.data() };
-  //       const membersRef = collection(this.firestore,`groups/${docSnap.id}/members`);
-  //       const membersSnapshot = await getDocs(membersRef);
-  //       const members = membersSnapshot.docs.map(m => m.data());
-  //       return {...groupData, members};
-  //     })
-  //   );
-  //   return groups;
-  // }
-
   getMyGroups() {
     const uid = this.auth.currentUser?.uid;
     const groupsRef = collection(this.firestore, 'groups');
@@ -55,6 +39,39 @@ export class GroupService {
       const memberRef = doc(this.firestore,`groups/${groupRef.id}/members/${user.userId}`);
       batch.set(memberRef, { userId: user.userId, role: user.role, email: user.email, username: user.username, state: 'pending' });
     });
+    await batch.commit();
+  }
+
+  async modifyGroup(groupId: string, group: any, addedUsers: any[], removedUsers: any[], updatedUsers: any[]) {
+    const batch = writeBatch(this.firestore);
+    // ADD
+    addedUsers.forEach(user => {
+      const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
+      batch.set(ref, {
+        userId: user.userId,
+        username: user.username,
+        role: user.role,
+        state: 'accepted'
+      });
+    });
+  
+    // DELETE
+    removedUsers.forEach(user => {
+      const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
+      batch.delete(ref);
+    });
+  
+    // UPDATE
+    updatedUsers.forEach(user => {
+      const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
+      batch.update(ref, { role: user.role });
+    });
+
+    //UPDATE GROUP INFO
+    if(group){
+      const docRef = doc(this.firestore, `groups/${groupId}`);
+      updateDoc(docRef, group)
+    }
     await batch.commit();
   }
 

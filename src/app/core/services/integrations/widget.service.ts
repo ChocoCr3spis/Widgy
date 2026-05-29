@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, QueryConstraint, collection, addDoc, collectionData, query, where, doc, updateDoc, deleteDoc, orderBy, limit, startAfter, getDocs } from '@angular/fire/firestore';
+import { Firestore, QueryConstraint, collection, addDoc, collectionData, query, where, doc, updateDoc, deleteDoc, orderBy, limit, startAfter, getDocs, docData, getDoc } from '@angular/fire/firestore';
 import { getDownloadURL, ref, Storage, uploadBytes, deleteObject  } from '@angular/fire/storage';
 import { Auth } from '@angular/fire/auth';
 import { Widget } from '../../models/widget.interface';
+import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -19,12 +20,64 @@ export class WidgetService {
     return addDoc(widgetsRef, widget);
   }
 
+  async getWidgetInfo(widgetId: any){
+    const widgetRef = doc(this.firestore, `widgets/${widgetId}`);
+    const snapshot = await getDoc(widgetRef);
+    if (!snapshot.exists()) {
+      return null;
+    }
+    return {widgetId: snapshot.id, ...snapshot.data()};
+  }
+
+  async createImageWidget(widget: any, imageFile: File | null) {
+    const docRef = await addDoc(collection(this.firestore, 'widgets'),{ ...widget,data: { imageUrl: '' } });
+    const storageRef = ref(this.storage, `widgets/${docRef.id}/image.jpg`);
+    await uploadBytes(storageRef, imageFile!);
+    const downloadUrl = await getDownloadURL(storageRef);
+    await updateDoc(doc(this.firestore, 'widgets', docRef.id),{ data: { imageUrl: downloadUrl } });
+  }
+
+  async modifyWidget(widget: any, widgetId: string){
+    const docRef = doc(this.firestore, `widgets/${widgetId}`);
+    await updateDoc(docRef, widget);
+  }
+
+  async modifyImageWidget(widget: any, imageFile: File | null, widgetId: string, oldDownloadUrl: string) {
+    let downloadUrl = '';
+    if(imageFile){
+      const imageRef = ref(this.storage, `widgets/${widgetId}/image.jpg`);
+      deleteObject(imageRef);
+      const storageRef = ref(this.storage, `widgets/${widgetId}/image.jpg`);
+      await uploadBytes(storageRef, imageFile!);
+      downloadUrl = await getDownloadURL(storageRef);
+    }else{
+      downloadUrl = oldDownloadUrl;
+    }
+    
+    const docRef = doc(this.firestore, `widgets/${widgetId}`);
+    widget.data.imageUrl = downloadUrl;
+    await updateDoc(docRef, widget);
+  }
+
   getMyWidgets() {
     const uid = this.auth.currentUser?.uid;
-    console.log(uid)
     const widgetsRef = collection(this.firestore, 'widgets');
     const q = query(widgetsRef, where('ownerId', '==', uid), orderBy('createdAt', 'desc'));
     return collectionData(q, { idField: 'widgetId' })
+  }
+
+  getWidgetsSharedWithMe(){
+    const uid = this.auth.currentUser?.uid;
+    const sharedWidgetsRef = collection(this.firestore, `users/${uid}/sharedWidgets`);
+    const q = query(sharedWidgetsRef);
+    return collectionData(q, { idField: 'widgetId' })
+  }
+
+  async getWidgetSharedWith(widgetId: string){
+    const widgetsRef = collection(this.firestore, `widgets/${widgetId}/invitations`);
+    const q = query(widgetsRef);
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ ...doc.data()}))
   }
 
   async changeVisivility(visibility: string, widgetId: string){
@@ -39,14 +92,6 @@ export class WidgetService {
     }
     const docRef = doc(this.firestore, `widgets/${widgetId}`);
     return deleteDoc(docRef);
-  }
-
-  async createImageWidget(widget: any, imageFile: File | null) {
-    const docRef = await addDoc(collection(this.firestore, 'widgets'),{ ...widget,data: { imageUrl: '' } });
-    const storageRef = ref(this.storage, `widgets/${docRef.id}/image.jpg`);
-    await uploadBytes(storageRef, imageFile!);
-    const downloadUrl = await getDownloadURL(storageRef);
-    await updateDoc(doc(this.firestore, 'widgets', docRef.id),{ data: { imageUrl: downloadUrl } });
   }
 
   async getPublicWidgets(filters: any) {
