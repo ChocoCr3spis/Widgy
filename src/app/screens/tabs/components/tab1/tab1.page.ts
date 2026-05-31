@@ -136,7 +136,6 @@ export class Tab1Page {
   }
 
   async openEditModal(widget: Widget) {
-    console.log(widget);
     this.selectedWidget = widget;
     switch(widget.type){
       case 'vote':
@@ -386,7 +385,6 @@ export class Tab1Page {
   }
 
   async changeRole(user: any, role: string){
-    debugger
     this.selectedWidgetSharedWith!.find(u => u.userId == user.userId).role = role;
     await this.invitationService.modifyInvitation(user.widgetId, user.userId, role);
   }

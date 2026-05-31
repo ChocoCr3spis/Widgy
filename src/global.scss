@@ -66,3 +66,13 @@ ion-chip > ion-icon {
 .loading-btn {
   height: 78px;
 }
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.widget-btns {
+  display: flex;
+  justify-content: end;
+}

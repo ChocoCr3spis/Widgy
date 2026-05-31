@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, collectionData, deleteDoc, doc, docData, getDocs, orderBy, query, setDoc, where, writeBatch,  } from '@angular/fire/firestore';
 import { Group } from '../../models/group.interface';
-import { updateDoc } from 'firebase/firestore';
+import { getDoc, updateDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -45,18 +45,24 @@ export class InvitationService {
     const batch = writeBatch(this.firestore);
     const widgetUserRef = doc(this.firestore,`users/${userId}/sharedWidgets/${widgetId}`);
     const invitedUserRef = doc(this.firestore,`users/${userId}/invitations/${widgetId}`);
-    batch.set(widgetUserRef, widgetInfo);
+    batch.set(widgetUserRef, { widgetId: widgetId, role: widgetInfo.role });
     batch.delete(invitedUserRef);
     await batch.commit();
   }
 
 
-  async modifyInvitation(widgetId: string, userId: string, role: string){
+  async modifyInvitation(widgetId: string, userId: string, role: string) {
     const batch = writeBatch(this.firestore);
     const widgetRef = doc(this.firestore,`widgets/${widgetId}/invitations/${userId}`);
+    const widgetUserRef = doc(this.firestore,`users/${userId}/sharedWidgets/${widgetId}`);
     const invitedUserRef = doc(this.firestore,`users/${userId}/invitations/${widgetId}`);
-    batch.update(widgetRef, { role: role })
-    batch.update(invitedUserRef, { role: role})
+    batch.update(widgetRef, { role });
+    if ((await getDoc(invitedUserRef)).exists()) {
+      batch.update(invitedUserRef, { role });
+    }
+    if ((await getDoc(widgetUserRef)).exists()) {
+      batch.update(widgetUserRef, { role });
+    }
     await batch.commit();
   }
 

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { UserService } from './../../core/services/integrations/user.service';
 import { Component, EnvironmentInjector, inject, ViewChild } from '@angular/core';
-import { IonModal, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonAvatar, IonButton, IonButtons, IonBadge, IonContent, IonItem, IonChip } from '@ionic/angular/standalone';
+import { IonModal, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonAvatar, IonButton, IonButtons, IonBadge, IonContent, IonItem, IonChip, IonToast } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { search, grid, personAdd, people, notificationsOutline, calendar, closeOutline, checkmarkOutline } from 'ionicons/icons';
 import { Observable } from 'rxjs';
@@ -14,14 +14,15 @@ import { Timestamp } from 'firebase/firestore';
   selector: 'app-tabs',
   templateUrl: 'tabs.page.html',
   styleUrls: ['tabs.page.scss'],
-  imports: [IonModal, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonAvatar, CommonModule, IonButton, IonButtons, IonBadge, IonContent, IonItem, IonChip],
+  imports: [IonModal, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonAvatar, CommonModule, IonButton, IonButtons, IonBadge, IonContent, IonItem, IonChip, IonToast],
   providers: [IonModal]
 })
 export class TabsPage {
   public environmentInjector = inject(EnvironmentInjector);
   user$!: Observable<any>;
   invitations: any[] | null = null;
-  
+  isToastOpen: boolean = false;
+
   @ViewChild('modalShare')
   modalInvitations!: IonModal;
 
@@ -52,19 +53,22 @@ export class TabsPage {
   }
 
   async acceptInvitation(invitation: any){
-    
-    const widgetInfo: any = await this.widgetService.getWidgetInfo(invitation.widgetId)
-    const widgetPayload = {
-      data: widgetInfo!.data,
-      description: widgetInfo!.description,
-      name: widgetInfo!.name,
-      ownerId: widgetInfo!.ownerId,
-      type: widgetInfo!.type,
-      role: invitation.role,
-      createdAt: Timestamp.now()
+    try{
+      const widgetInfo: any = await this.widgetService.getWidgetInfo(invitation.widgetId)
+      const widgetPayload = {
+        data: widgetInfo!.data,
+        description: widgetInfo!.description,
+        name: widgetInfo!.name,
+        ownerId: widgetInfo!.ownerId,
+        type: widgetInfo!.type,
+        role: invitation.role,
+        createdAt: Timestamp.now()
+      }
+      await this.invitationService.acceptInvitation(invitation.widgetId, invitation.userId, widgetPayload)
+    }catch(error){
+      this.isToastOpen = true;
+      await this.invitationService.deleteInvitation(invitation.widgetId, invitation.userId)
     }
-    console.log(widgetPayload)
-    await this.invitationService.acceptInvitation(invitation.widgetId, invitation.userId, widgetPayload)
   }
 
   async logOut(){

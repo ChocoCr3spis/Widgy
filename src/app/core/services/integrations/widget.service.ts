@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, QueryConstraint, collection, addDoc, collectionData, query, where, doc, updateDoc, deleteDoc, orderBy, limit, startAfter, getDocs, docData, getDoc } from '@angular/fire/firestore';
+import { Firestore, QueryConstraint, collection, addDoc, collectionData, query, where, doc, updateDoc, deleteDoc, orderBy, limit, startAfter, getDocs, docData, getDoc, writeBatch } from '@angular/fire/firestore';
 import { getDownloadURL, ref, Storage, uploadBytes, deleteObject  } from '@angular/fire/storage';
 import { Auth } from '@angular/fire/auth';
-import { Widget } from '../../models/widget.interface';
-import { map } from 'rxjs';
+import { combineLatest, map, of, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -66,11 +65,22 @@ export class WidgetService {
     return collectionData(q, { idField: 'widgetId' })
   }
 
-  getWidgetsSharedWithMe(){
+  getSharedWidgets() {
     const uid = this.auth.currentUser?.uid;
-    const sharedWidgetsRef = collection(this.firestore, `users/${uid}/sharedWidgets`);
-    const q = query(sharedWidgetsRef);
-    return collectionData(q, { idField: 'widgetId' })
+    const sharedRef = collection(this.firestore,`users/${uid}/sharedWidgets`);
+    return collectionData(sharedRef).pipe(switchMap((sharedWidgets: any[]) => {
+      if (sharedWidgets.length === 0) {
+        return of([]);
+      }
+      const widgetStreams = sharedWidgets.map(sharedWidget =>
+        docData( doc(this.firestore, `widgets/${sharedWidget.widgetId}`),{ idField: 'widgetId' }).pipe(
+          map((widget: any) => {
+            return { ...widget,role: sharedWidget.role }
+          })
+        )
+      );
+      return combineLatest(widgetStreams);
+    }));
   }
 
   async getWidgetSharedWith(widgetId: string){
@@ -90,8 +100,19 @@ export class WidgetService {
       const imageRef = ref(this.storage, `widgets/${widgetId}/image.jpg`);
       deleteObject(imageRef);
     }
+    const batch = writeBatch(this.firestore);
+    const sharedWith = collection(this.firestore, `widgets/${widgetId}/invitations`)
+    const snapshot = await getDocs(sharedWith);
+    const invitations = snapshot.docs.map(doc => ({
+      userId: doc.id
+    }));
+    invitations.forEach(u => {
+      const userSharedWidgetRef = doc(this.firestore, `users/${u.userId}/sharedWidgets/${widgetId}`);
+      batch.delete(userSharedWidgetRef);
+    })
     const docRef = doc(this.firestore, `widgets/${widgetId}`);
-    return deleteDoc(docRef);
+    batch.delete(docRef);
+    await batch.commit();
   }
 
   async getPublicWidgets(filters: any) {
