@@ -4,8 +4,5 @@ export interface Group {
   name: string;
   description: string;
   createdAt: any;
-  sharedWith: {
-    userId: string;
-    role: 'viewer' | 'editor';
-  }[];
+  ownerName: string;
 }

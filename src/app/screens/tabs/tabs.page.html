@@ -2,6 +2,10 @@
   <ion-header class="line">
     <ion-toolbar>
       <div class="header">
+        <ion-tab-button [ngClass]="'notification-btn'" (click)="openInvitations()">
+          <ion-icon name="notifications-outline"></ion-icon>
+          <ion-badge color="danger">{{ invitations?.length }}</ion-badge>
+        </ion-tab-button>
         <ion-title>
           <span *ngIf="user$ | async as user;" class="title">
               <p class="welcome">Welcome </p>@{{ user.username }}
@@ -37,3 +41,49 @@
   </ion-tab-bar>
 
 </ion-tabs>
+
+<ion-modal #modalShare>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Invitaciones</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()">Cancelar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="ion-padding">
+        <div>
+          @for (invitation of invitations; track invitation.userId) {
+            <ion-item>
+              <ion-avatar slot="start">
+                <img [src]="invitation.photoUrl || 'assets/profile/default_profile_image.jpeg'">
+              </ion-avatar>
+              <ion-label>
+                @if(invitation.invitationType === 'group'){
+                   <h2>Has sido invitado/a a un grupo llamado {{ invitation.groupName }}</h2>
+                }@else{
+                  <h2>Has sido invitado/a a un widget de {{ invitation.widgetType == 'text' ? 'texto' : invitation.widgetType == 'vote' ? 'votación' : 'imagen' }} con permisos de {{ invitation.role == 'editor' ? 'edición' : 'visualicación' }}</h2>
+                }
+                <p>Invitado/a por {{ invitation.ownerUsername }}</p>
+              </ion-label>
+              <ion-chip [outline]="true" color="danger" (click)="rejectInvitation(invitation)">
+                <ion-icon name="close-outline" color="danger"></ion-icon>
+              </ion-chip>
+              <ion-chip [outline]="true" color="success" (click)="acceptInvitation(invitation)">
+                <ion-icon name="checkmark-outline" color="success"></ion-icon>
+              </ion-chip>
+            </ion-item>
+          }
+        </div>
+        @if (invitations?.length === 0) {
+          <div class="empty-state">
+            <p>No tienes ninguna invitación</p>
+          </div>
+        }
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+<ion-toast [isOpen]="isToastOpen" message="Esta invitación ya no es válida" [duration]="5000" (didDismiss)="isToastOpen = false"></ion-toast>

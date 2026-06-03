@@ -1,17 +1,181 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+<ion-content>
+  <div class="my-widgets-cont">  
+    @for (widget of widgets; track widget.widgetId) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title class="widget-header">
+            {{ widget.name }} 
+              <ion-chip [outline]="true" color="danger" (click)="leave(widget)">
+                <ion-icon name="exit-outline"></ion-icon>
+              </ion-chip>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>{{ widget.description }}</p>
+          @switch (widget.type) {
+            @case ('text') {
+              <p>{{ widget.data.text }}</p>
+            }
+            @case ('image') {
+              <img [src]="widget.data.imageUrl">
+            }
+            @case ('vote') {
+              <p>{{ widget.data.question }}</p>
+              <div class="vote-options">
+                @for (
+                  option of widget.data.options;
+                  track option.text
+                ) {
+                  <ion-chip>
+                    {{ option.text }}
+                    ({{ option.votes }})
+                  </ion-chip>
+                }
+              </div>
+            }
+          }
+          @if(widget.role == 'editor'){
+            <div class="widget-btns">
+              <ion-chip (click)="openEditModal(widget)" [outline]="true">
+                <ion-icon name="create-outline"></ion-icon>
+              </ion-chip>
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+    }
+    
+    @if (!widgets) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          <br>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+    }
+  
+    @if (widgets?.length === 0) {
+      <div class="empty-state">
+        <p>No tienes widgets todavía</p>
+      </div>
+    }
+  </div>
 </ion-content>
+
+<ion-modal #modalEdit>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Editando widget...</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal(selectedWidget?.type!, modalEdit)">Cancelar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      @switch (selectedWidget?.type) {
+        @case ('text') {
+          <div class="form" [formGroup]="textWidgetForm">
+            <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
+            <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
+            <ion-textarea label="Texto" labelPlacement="floating" fill="outline" placeholder="Enter text" formControlName="text" [counter]="true" [autoGrow]="true" maxlength="250"></ion-textarea>
+          </div>
+        }
+        @case ('image') {
+          <div class="form" [formGroup]="imgWidgetForm">
+            <ion-input label="Nombre" labelPlacement="floating" fill="outline" formControlName="nombre"></ion-input>
+            <ion-input label="Descripción" labelPlacement="floating" fill="outline" formControlName="descripcion"></ion-input>
+            <div class="image-box" (click)="selectImage()">
+              @if(imagePreview){
+                <img [src]="imagePreview"/>
+              }@else {
+                <span class="plus">+</span>
+              }        
+            </div>
+          </div>
+        }
+        @case ('vote') {
+          <div class="form" [formGroup]="voteWidgetForm">
+            <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
+            <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
+            <ion-input label="Pregunta" labelPlacement="floating" fill="outline" type="text" formControlName="pregunta"></ion-input>
+            <div formArrayName="opciones" class="opciones">
+              @for(opcion of opciones.controls; track opcion){
+                <div class="opcion">
+                  <ion-input
+                    [label]="'Opción ' + ($index + 1)"
+                    labelPlacement="floating"
+                    fill="outline"
+                    [formControlName]="$index">
+                  </ion-input>
+                  @if($index > 1){
+                    <ion-button fill="clear" color="danger" (click)="removeOption($index)">
+                      <ion-icon name="trash"></ion-icon>
+                    </ion-button>
+                  }
+                </div>
+              }
+            </div>
+
+            <ion-button class="ion-padding" expand="block" fill="outline" (click)="addOption()">
+              + Añadir opción
+            </ion-button>
+          </div>
+        }
+      }
+    </ion-content>
+    @if(!saving){
+      @switch (selectedWidget?.type) {
+        @case ('image') {
+          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="imgWidgetForm.invalid || (!imageFile && imgWidgetForm.pristine)">Guardar</ion-button>
+        }
+        @case ('vote') {
+          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="voteWidgetForm.invalid || voteWidgetForm.pristine && (selectedWidget?.data.options!.length == opciones.length)">Guardar</ion-button>
+        }
+        @case ('text') {
+          <ion-button class="ion-padding" (click)="saveWidget(modalEdit)" [disabled]="textWidgetForm.invalid || textWidgetForm.pristine">Guardar</ion-button>
+        }
+    }
+    }@else {
+      <ion-button [className]="'ion-padding loading-btn'" [disabled]="true">
+        <ion-spinner name="crescent"></ion-spinner>
+      </ion-button>
+    }
+  </ng-template>
+</ion-modal>

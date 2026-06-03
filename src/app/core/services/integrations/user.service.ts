@@ -21,18 +21,14 @@ export class UserService {
   private initUserListener() {
     authState(this.auth).pipe(
       switchMap(firebaseUser => {
-  
         if (!firebaseUser) return of(null);
-  
         const userRef = doc(this.firestore, 'users', firebaseUser.uid);
-  
         return docData(userRef).pipe(
           map(userData => ({
             ...userData,
             uid: firebaseUser.uid
           }))
         );
-  
       })
     ).subscribe(userData => {
       this.userSubject.next(userData);
@@ -66,6 +62,5 @@ export class UserService {
     return collectionData(q, {
       idField: 'userId'
     });
-
   }
 }

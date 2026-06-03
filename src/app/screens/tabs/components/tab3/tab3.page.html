@@ -1,13 +1,7 @@
 <ion-toolbar>
-  <div  [formGroup]="filterPublicWidgetsForm">
-    <ion-searchbar 
-      formControlName="text"
-      placeholder="Buscar nombre..."
-      (keyup.enter)="searchWidgets()"
-    >
-    </ion-searchbar>
+  <div [formGroup]="filterPublicWidgetsForm">
+    <ion-searchbar formControlName="text" placeholder="Buscar nombre..." (keyup.enter)="searchWidgets()"/>
   </div>
-
   <ion-button id="open-modal-filter" slot="end" fill="clear">
     <ion-icon name="filter" ></ion-icon>
     <ion-modal #modalFilter trigger="open-modal-filter" [presentingElement]="presentingElement">
@@ -24,10 +18,16 @@
           <div class="form">
               <ion-item>
                 <ion-label>Fecha desde</ion-label>
-                <ion-datetime-button id="dateFromBtn" datetime="dateFrom"></ion-datetime-button>
-                <ion-button fill="clear" (click)="clearDate('dateFrom')">
-                  <ion-icon name="trash" ></ion-icon>
-                </ion-button>
+                <ion-datetime-button id="dateFromBtn" datetime="dateFrom">
+                   @if (!filterPublicWidgetsForm.value.dateFrom) {
+                      <span slot="date-target">Sin seleccionar</span>
+                    }
+                </ion-datetime-button>
+                @if (filterPublicWidgetsForm.value.dateFrom) {
+                  <ion-chip [outline]="true" color="danger" (click)="clearDate('dateFrom')">
+                    <ion-icon name="trash" color="danger"></ion-icon>
+                  </ion-chip>
+                }
               </ion-item>
               <ion-modal [keepContentsMounted]="true" trigger="dateFromBtn">
                 <ng-template>
@@ -41,10 +41,16 @@
               </ion-modal>
               <ion-item>
                 <ion-label>Fecha hasta</ion-label>
-                <ion-datetime-button id="dateToBtn" datetime="dateTo"></ion-datetime-button>
-                <ion-button fill="clear" (click)="clearDate('dateTo')">
-                  <ion-icon name="trash"></ion-icon>
-                </ion-button>
+                <ion-datetime-button id="dateToBtn" datetime="dateTo">
+                   @if (!filterPublicWidgetsForm.value.dateTo) {
+                      <span slot="date-target">Sin seleccionar</span>
+                    }
+                </ion-datetime-button>
+                @if (filterPublicWidgetsForm.value.dateTo) {
+                  <ion-chip [outline]="true" color="danger" (click)="clearDate('dateTo')">
+                    <ion-icon name="trash" color="danger"></ion-icon>
+                  </ion-chip>
+                }
               </ion-item>
               <ion-modal [keepContentsMounted]="true" trigger="dateToBtn">
                 <ng-template>
@@ -56,12 +62,30 @@
                   </ion-datetime>
                 </ng-template>
               </ion-modal>
-            <ion-select formControlName="type" placeholder="Tipo de widget" fill="outline" interface="popover" [multiple]="true">
-              <ion-select-option value="vote">Votación</ion-select-option>
-              <ion-select-option value="image">Imagen</ion-select-option>
-              <ion-select-option value="text">Texto</ion-select-option>
-            </ion-select>
-            <ion-input label="Nombre del Propietario" labelPlacement="floating" fill="outline" type="text" formControlName="ownerName"></ion-input>
+              <ion-item>
+                <ion-select formControlName="type" placeholder="Todos" label="Tipo de widget" interface="popover" [multiple]="true">
+                  <ion-select-option value="vote">Votación</ion-select-option>
+                  <ion-select-option value="image">Imagen</ion-select-option>
+                  <ion-select-option value="text">Texto</ion-select-option>
+                </ion-select>
+              </ion-item>
+            <app-search-users (userSelected)="addUser($event, 'edit')" [usersForFilter]="addedUsers" [currentUserId]="this.user.uid"></app-search-users>
+            <div>
+              @for (user of addedUsers; track user.userId) {
+                <ion-item>
+                  <ion-avatar slot="start">
+                    <img [src]="user.photoUrl || 'assets/profile/default_profile_image.jpeg'">
+                  </ion-avatar>
+                  <ion-label>
+                    <h2>{{ user.username }}</h2>
+                    <p>{{ user.email }}</p>
+                  </ion-label>
+                  <ion-chip [outline]="true" color="danger" (click)="deleteUser(user)">
+                    <ion-icon name="trash" color="danger"></ion-icon>
+                  </ion-chip> 
+                </ion-item>
+              }
+            </div>
           </div>
         </ion-content>
         <ion-button class="ion-padding" (click)="searchWidgets()">Aplicar filtros</ion-button>

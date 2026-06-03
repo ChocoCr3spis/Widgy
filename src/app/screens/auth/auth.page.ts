@@ -9,7 +9,5 @@ import { IonTabs } from "@ionic/angular/standalone";
   imports: [IonTabs],
 })
 export class Auth {
-  constructor(){
-    console.log('asdasasd')
-  }
+  constructor(){}
 }

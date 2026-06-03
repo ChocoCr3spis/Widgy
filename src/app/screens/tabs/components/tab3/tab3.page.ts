@@ -1,16 +1,20 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import {  IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonDatetime, IonDatetimeButton, IonFab, IonFabButton, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList, IonInput, IonModal, IonRefresher, IonRefresherContent, IonHeader, IonSearchbar, IonSelect, IonSelectOption, IonToolbar, IonTitle } from '@ionic/angular/standalone';
+import {  IonAvatar, IonChip, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonDatetime, IonDatetimeButton, IonFab, IonFabButton, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList, IonInput, IonModal, IonRefresher, IonRefresherContent, IonHeader, IonSearchbar, IonSelect, IonSelectOption, IonToolbar, IonTitle } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filter, trash } from 'ionicons/icons';
 import { WidgetService } from 'src/app/core/services/integrations/widget.service';
 import { Widget } from 'src/app/core/models/widget.interface';
+import { SearchUsers } from "src/app/shared/search-users/search-users.page";
+import { UserService } from 'src/app/core/services/integrations/user.service';
 
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
   imports: [ 
+    IonAvatar,
+    IonChip,
     IonButton,
     IonButtons,
     IonCard,
@@ -21,9 +25,9 @@ import { Widget } from 'src/app/core/models/widget.interface';
     IonDatetime,
     IonDatetimeButton,
     IonIcon,
+    IonItem,
     IonInfiniteScroll, 
     IonInfiniteScrollContent,
-    IonItem,
     IonInput,
     IonLabel,
     IonRefresher,
@@ -36,12 +40,15 @@ import { Widget } from 'src/app/core/models/widget.interface';
     IonToolbar, 
     IonTitle, 
     ReactiveFormsModule,
+    SearchUsers,
   ],
 })
 export class Tab3Page {
   presentingElement!: HTMLElement | null;
 
   filterPublicWidgetsForm: FormGroup;
+  addedUsers: any[] = [];
+  user: any = null;
 
   widgets?: Widget[] | any;
 
@@ -52,6 +59,7 @@ export class Tab3Page {
 
   constructor(
     private fb: FormBuilder,
+    private userService: UserService,
     private widgetService: WidgetService
   ) {
     addIcons({ filter, trash });
@@ -61,13 +69,14 @@ export class Tab3Page {
       type: [[]],
       dateFrom: [null],
       dateTo: [null],
-      ownerName: [''],
+      owners: [[]],
     });
-
   }
 
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
+
+    this.user = await this.userService.getCurrentUser();
 
     //Carga de datos inicial
     const res = await this.widgetService.getPublicWidgets({});
@@ -79,7 +88,6 @@ export class Tab3Page {
   async refresh(event: any){
     const filters = this.filterPublicWidgetsForm.value;
     const res = await this.widgetService.getPublicWidgets({ ...filters });
-
     this.widgets = res.data;
     this.lastWidget = res.lastDoc;
 
@@ -98,7 +106,7 @@ export class Tab3Page {
 
     this.lastWidget = null;
 
-    const res = await this.widgetService.getPublicWidgets({ ...filters });
+    const res = await this.widgetService.getPublicWidgets({ ...filters});
 
     this.widgets = res.data;
     this.lastWidget = res.lastDoc;
@@ -122,6 +130,30 @@ export class Tab3Page {
       event.target.disabled = true;
     }
   }
+
+  addUser(event: any, mode: string){
+    this.addedUsers.push({
+      email: event.email, 
+      userId: event.userId, 
+      username: event.username, 
+      usernameLower: event.usernameLower, 
+    });
+
+    const owners = this.filterPublicWidgetsForm.value.owners;
+    this.filterPublicWidgetsForm.patchValue({
+      owners: [...owners, event.userId]
+    });
+  }
+
+  deleteUser(user: any){
+    this.addedUsers = this.addedUsers.filter(u => u.userId != user.userId);
+
+    const owners = this.filterPublicWidgetsForm.value.owners || [];
+    this.filterPublicWidgetsForm.patchValue({
+      owners: owners.filter((id: string) => id !== user.userId)
+    });
+  }
+
 
   setDate(control: string, ev: any) {
     const iso = ev.detail.value;
