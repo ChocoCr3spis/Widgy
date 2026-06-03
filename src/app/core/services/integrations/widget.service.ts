@@ -75,7 +75,7 @@ export class WidgetService {
       const widgetStreams = sharedWidgets.map(sharedWidget =>
         docData( doc(this.firestore, `widgets/${sharedWidget.widgetId}`),{ idField: 'widgetId' }).pipe(
           map((widget: any) => {
-            return { ...widget,role: sharedWidget.role }
+            return { ...widget, role: sharedWidget.role }
           })
         )
       );
@@ -136,6 +136,10 @@ export class WidgetService {
       const end = new Date(filters.dateTo);
       end.setHours(23, 59, 59, 999);
       conditions.push(where('createdAt', '<=', end));
+    } 
+
+    if (filters?.text){
+      conditions.push(where('name', '==', filters.text));
     } 
 
     conditions.push(orderBy('createdAt', 'desc'));

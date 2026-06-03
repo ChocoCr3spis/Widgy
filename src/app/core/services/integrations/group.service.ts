@@ -92,9 +92,9 @@ export class GroupService {
         return of([]);
       }
       const widgetStreams = sharedGroups.map(sharedGroup =>
-        docData( doc(this.firestore, `groups/${sharedGroup.groupId}`),{ idField: 'groupId' }).pipe(
+        docData(doc(this.firestore, `groups/${sharedGroup.groupId}`),{ idField: 'groupId' }).pipe(
           map((group: any) => {
-            return { ...group,role: sharedGroup.role }
+            return { ...group, role: sharedGroup.role }
           })
         )
       );

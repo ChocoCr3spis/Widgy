@@ -56,7 +56,6 @@ export class TabsPage {
     try{
       await this.invitationService.acceptInvitation(invitation.widgetId, invitation.userId, invitation.role, invitation.invitationType);
     }catch(error){
-      console.error('Error accepting invitation:', error);
       this.isToastOpen = true;
       await this.invitationService.deleteInvitation(invitation.widgetId, invitation.userId, invitation.invitationType);
     }

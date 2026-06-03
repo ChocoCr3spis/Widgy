@@ -1,11 +1,7 @@
 <ion-toolbar>
   <div>
-    <ion-searchbar
-      placeholder="Buscar texto o descripción..."
-   >
-    </ion-searchbar>
+    <ion-searchbar formControlName="text" placeholder="Buscar nombre..." (keyup.enter)="searchWidgets()"/>
   </div>
-
   <ion-button id="open-modal-filter" slot="end" fill="clear">
     <ion-icon name="filter" ></ion-icon>
     <ion-modal #modalFilter trigger="open-modal-filter" [presentingElement]="presentingElement">
