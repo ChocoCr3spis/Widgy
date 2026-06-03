@@ -1,8 +1,10 @@
 <ion-toolbar>
-  <div>
-    <ion-searchbar
-      placeholder="Buscar texto o descripción..."
-   >
+  <div  [formGroup]="filterPublicWidgetsForm">
+    <ion-searchbar 
+      formControlName="text"
+      placeholder="Buscar nombre..."
+      (keyup.enter)="searchWidgets()"
+    >
     </ion-searchbar>
   </div>
 

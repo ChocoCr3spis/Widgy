@@ -72,6 +72,10 @@ export class WidgetService {
       conditions.push(where('createdAt', '<=', end));
     } 
 
+    if (filters?.text){
+      conditions.push(where('name', '==', filters.text));
+    } 
+
     conditions.push(orderBy('createdAt', 'desc'));
 
     if (filters?.lastWidget){

@@ -57,6 +57,7 @@ export class Tab3Page {
     addIcons({ filter, trash });
 
     this.filterPublicWidgetsForm = this.fb.group({
+      text: [''],
       type: [[]],
       dateFrom: [null],
       dateTo: [null],
