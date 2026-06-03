@@ -143,6 +143,10 @@ export class WidgetService {
       conditions.push(where('name', '==', filters.text));
     } 
 
+    if (filters?.owners && Array.isArray(filters.owners) && filters.owners.length > 0){
+      conditions.push(where('ownerId', 'in', filters.owners));
+    }
+
     conditions.push(orderBy('createdAt', 'desc'));
 
     if (filters?.lastWidget){
@@ -158,8 +162,6 @@ export class WidgetService {
       data: snapshot.docs.map(d => ({ widgetId: d.id, ...d.data() })),
       lastDoc: snapshot.docs[snapshot.docs.length - 1] || null
     };
-
-    //return collectionData(q, { idField: 'widgetId' })
   }
 
 }
