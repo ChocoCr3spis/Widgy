@@ -94,14 +94,14 @@ export class Tab1Page {
       nombre: [null, [Validators.required, Validators.maxLength(20)]],
       descripcion: [null, [Validators.required, Validators.maxLength(50)]],
       text: [null, [Validators.required, Validators.maxLength(250)]],
-      public: [false, [Validators.required]]
+      public: [false]
     });
 
     this.voteWidgetForm = this.fb.group({
       nombre: [null, [Validators.required, Validators.maxLength(20)]],
       descripcion: [null, [Validators.required, Validators.maxLength(50)]],
       pregunta: [null, [Validators.required]],
-      public: [false, [Validators.required]],
+      public: [false],
       opciones: this.fb.array([
         this.fb.control('', Validators.required),
         this.fb.control('', Validators.required)
@@ -111,7 +111,7 @@ export class Tab1Page {
     this.imgWidgetForm = this.fb.group({
       nombre: [null, [Validators.required, Validators.maxLength(20)]],
       descripcion: [null, [Validators.required, Validators.maxLength(50)]],
-      public: [false, [Validators.required]]
+      public: [false]
     });
 
     this.shareForm = this.fb.group({

@@ -4,4 +4,5 @@ export interface Group {
   name: string;
   description: string;
   createdAt: any;
+  ownerName: string;
 }

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, collectionData, deleteDoc, doc, docData, getDocs, orderBy, query, setDoc, where, writeBatch,  } from '@angular/fire/firestore';
-import { updateDoc } from 'firebase/firestore';
+import { getDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { InvitationService } from './invitation.service';
 import { combineLatest, map, of, switchMap } from 'rxjs';
 
@@ -28,6 +28,15 @@ export class GroupService {
     return snapshot.docs.map(doc => ({ userId: doc.id, ...doc.data()}))
   }
 
+  async getGroupInfo(groupId: string){
+    const groupRef = doc(this.firestore, `groups/${groupId}`);
+    const snapshot = await getDoc(groupRef);
+    if (!snapshot.exists()) {
+      return null;
+    }
+    return {groupId: snapshot.id, ...snapshot.data()};
+  }
+
   changeUserRole(role: string, userId: string, groupId: string){
     const userRef = doc(this.firestore, `groups/${groupId}/members/${userId}`);
     updateDoc(userRef, { role: role })
@@ -46,28 +55,56 @@ export class GroupService {
     this.invitationService.createGroupInvitations(invitations, groupRef.id);
   }
 
-  async modifyGroup(groupId: string, group: any, addedUsers: any[], removedUsers: any[], updatedUsers: any[]) {
+  async modifyGroup(groupId: string, ownerName: string, groupName: string, group: any, addedUsers: any[], removedUsers: any[], updatedUsers: any[]) {
     const batch = writeBatch(this.firestore);
     // ADD
     addedUsers.forEach(user => {
+      debugger
       const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
       batch.set(ref, {
         userId: user.userId,
         username: user.username,
         role: user.role,
-        state: 'accepted'
+        state: 'pending',
+        email: user.email
       });
+      let invitation = {
+        createdAt: Timestamp.now(),
+        groupId: groupId,
+        invitationType: 'group',
+        ownerUsername: ownerName,
+        role: user.role,
+        userId: user.userId,
+        username: user.username,
+        groupName: groupName
+      }
+      const invitedUserRef = doc(this.firestore,`users/${user.userId}/invitations/${groupId}`);
+      batch.set(invitedUserRef, invitation);
     });
   
     // DELETE
     removedUsers.forEach(user => {
       const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
+      const groupRef = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
+      const invitedUserRef = doc(this.firestore,`users/${user.userId}/invitations/${groupId}`);
+      const groupUserRef = doc(this.firestore,`users/${user.userId}/sharedGroups/${groupId}`);
+      batch.delete(groupRef);
+      batch.delete(invitedUserRef);
+      batch.delete(groupUserRef);
       batch.delete(ref);
     });
   
     // UPDATE
     updatedUsers.forEach(user => {
+      debugger
       const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
+      if(user.state === 'pending'){
+        const invitedUserRef = doc(this.firestore,`users/${user.userId}/invitations/${groupId}`);
+        batch.update(invitedUserRef, { role: user.role });
+      }else{
+        const groupUserRef = doc(this.firestore,`users/${user.userId}/sharedGroups/${groupId}`);
+        batch.update(groupUserRef, { role: user.role });
+      }
       batch.update(ref, { role: user.role });
     });
 
@@ -79,9 +116,21 @@ export class GroupService {
     await batch.commit();
   }
 
-  deleteGroup(groupId: string){
+  async deleteGroup(groupId: string){
+    const batch = writeBatch(this.firestore);
+    const sharedWith = collection(this.firestore, `groups/${groupId}/members`)
+    const snapshot = await getDocs(sharedWith);
+    const invitations = snapshot.docs.map(doc => ({
+      userId: doc.id
+    }));
+    invitations.forEach(u => {
+      const userSharedWidgetRef = doc(this.firestore, `users/${u.userId}/sharedGroups/${groupId}`);
+      batch.delete(userSharedWidgetRef);
+    });
+    snapshot.docs.map(doc =>{ batch.delete(doc.ref) })
     const docRef = doc(this.firestore, `groups/${groupId}`);
-    return deleteDoc(docRef);
+    batch.delete(docRef);
+    await batch.commit();
   }
 
   getSharedGroups() {
@@ -91,14 +140,32 @@ export class GroupService {
       if (sharedGroups.length === 0) {
         return of([]);
       }
-      const widgetStreams = sharedGroups.map(sharedGroup =>
+      const groupStreams = sharedGroups.map(sharedGroup =>
         docData(doc(this.firestore, `groups/${sharedGroup.groupId}`),{ idField: 'groupId' }).pipe(
           map((group: any) => {
             return { ...group, role: sharedGroup.role }
           })
         )
       );
-      return combineLatest(widgetStreams);
+      return combineLatest(groupStreams);
     }));
   }
 }
+
+// getSharedWidgets() {
+//   const uid = this.auth.currentUser?.uid;
+//   const sharedRef = collection(this.firestore,`users/${uid}/sharedWidgets`);
+//   return collectionData(sharedRef).pipe(switchMap((sharedWidgets: any[]) => {
+//     if (sharedWidgets.length === 0) {
+//       return of([]);
+//     }
+//     const widgetStreams = sharedWidgets.map(sharedWidget =>
+//       docData( doc(this.firestore, `widgets/${sharedWidget.widgetId}`),{ idField: 'widgetId' }).pipe(
+//         map((widget: any) => {
+//           return { ...widget, role: sharedWidget.role }
+//         })
+//       )
+//     );
+//     return combineLatest(widgetStreams);
+//   }));
+// }

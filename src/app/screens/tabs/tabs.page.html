@@ -62,7 +62,7 @@
               </ion-avatar>
               <ion-label>
                 @if(invitation.invitationType === 'group'){
-                   <h2>Has sido invitado/a a un grupo llamado {{ invitation.name }}</h2>
+                   <h2>Has sido invitado/a a un grupo llamado {{ invitation.groupName }}</h2>
                 }@else{
                   <h2>Has sido invitado/a a un widget de {{ invitation.widgetType == 'text' ? 'texto' : invitation.widgetType == 'vote' ? 'votación' : 'imagen' }} con permisos de {{ invitation.role == 'editor' ? 'edición' : 'visualicación' }}</h2>
                 }

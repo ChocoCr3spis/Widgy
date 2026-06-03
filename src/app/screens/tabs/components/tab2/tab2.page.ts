@@ -40,7 +40,7 @@ export class Tab2Page {
     private platform: Platform,
 
   ) {
-    addIcons({ createOutline, exitOutline,trash });
+    addIcons({ createOutline, exitOutline, trash });
 
     this.textWidgetForm = this.fb.group({
       nombre: [null, [Validators.required, Validators.maxLength(20)]],

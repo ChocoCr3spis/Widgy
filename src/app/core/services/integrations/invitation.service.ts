@@ -30,13 +30,15 @@ export class InvitationService {
     await batch.commit();
   }
 
-async deleteInvitation(invitationTypeId: string, userId: string, type: string){
+  async deleteInvitation(invitationTypeId: string, userId: string, type: string){
     const batch = writeBatch(this.firestore);
     if(type === 'group'){
       const groupRef = doc(this.firestore,`groups/${invitationTypeId}/members/${userId}`);
       const invitedUserRef = doc(this.firestore,`users/${userId}/invitations/${invitationTypeId}`);
+      const groupUserRef = doc(this.firestore,`users/${userId}/sharedGroups/${invitationTypeId}`);
       batch.delete(groupRef);
       batch.delete(invitedUserRef);
+      batch.delete(groupUserRef);
     }else{
       const widgetRef = doc(this.firestore,`widgets/${invitationTypeId}/invitations/${userId}`);
       const invitedUserRef = doc(this.firestore,`users/${userId}/invitations/${invitationTypeId}`);
@@ -64,20 +66,25 @@ async deleteInvitation(invitationTypeId: string, userId: string, type: string){
     await batch.commit();
   }
 
-  async acceptInvitation(invitationTypeId: string, userId: string, role: string, type: string){
+  async acceptWidgetInvitation(widgetId: string, userId: string, role: string){
     const batch = writeBatch(this.firestore);
-    if(type === 'group'){
-      const groupUserRef = doc(this.firestore,`users/${userId}/sharedGroups/${invitationTypeId}`);
-      batch.set(groupUserRef, {groupId: invitationTypeId, role: role });
-    }else{
-      const widgetUserRef = doc(this.firestore,`users/${userId}/sharedWidgets/${invitationTypeId}`);
-      batch.set(widgetUserRef, { widgetId: invitationTypeId, role: role });
-    }
-    const invitedUserRef = doc(this.firestore,`users/${userId}/invitations/${invitationTypeId}`);
+    const widgetUserRef = doc(this.firestore,`users/${userId}/sharedWidgets/${widgetId}`);
+    const invitedUserRef = doc(this.firestore,`users/${userId}/invitations/${widgetId}`);
+    batch.set(widgetUserRef, { widgetId: widgetId, role: role });
     batch.delete(invitedUserRef);
     await batch.commit();
   }
 
+  async acceptGroupInvitation(groupId: string, userId: string, role: string){
+    const batch = writeBatch(this.firestore);
+    const groupRef = doc(this.firestore,`groups/${groupId}/members/${userId}`);
+    const groupUserRef = doc(this.firestore,`users/${userId}/sharedGroups/${groupId}`);
+    const invitedUserRef = doc(this.firestore,`users/${userId}/invitations/${groupId}`);
+    batch.update(groupRef, { state: 'accepted' });
+    batch.set(groupUserRef, { groupId: groupId, role: role });
+    batch.delete(invitedUserRef);
+    await batch.commit();
+  }
 
   async modifyInvitation(widgetId: string, userId: string, role: string) {
     const batch = writeBatch(this.firestore);

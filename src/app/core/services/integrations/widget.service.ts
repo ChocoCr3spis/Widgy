@@ -109,7 +109,8 @@ export class WidgetService {
     invitations.forEach(u => {
       const userSharedWidgetRef = doc(this.firestore, `users/${u.userId}/sharedWidgets/${widgetId}`);
       batch.delete(userSharedWidgetRef);
-    })
+    });
+    snapshot.docs.map(doc =>{ batch.delete(doc.ref) })
     const docRef = doc(this.firestore, `widgets/${widgetId}`);
     batch.delete(docRef);
     await batch.commit();

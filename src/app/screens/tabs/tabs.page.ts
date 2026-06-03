@@ -9,6 +9,7 @@ import { AuthService } from 'src/app/core/services/integrations/auth.service';
 import { InvitationService } from 'src/app/core/services/integrations/invitation.service';
 import { WidgetService } from 'src/app/core/services/integrations/widget.service';
 import { Timestamp } from 'firebase/firestore';
+import { GroupService } from 'src/app/core/services/integrations/group.service';
 
 @Component({
   selector: 'app-tabs',
@@ -30,7 +31,8 @@ export class TabsPage {
     private userService: UserService,
     private authService: AuthService,
     private invitationService: InvitationService,
-    private widgetService: WidgetService
+    private widgetService: WidgetService,
+    private groupService: GroupService
   ) {
     addIcons({ search, grid, personAdd, people, notificationsOutline, calendar, closeOutline, checkmarkOutline });
     this.user$ = this.userService.user$;
@@ -54,8 +56,17 @@ export class TabsPage {
 
   async acceptInvitation(invitation: any){
     try{
-      await this.invitationService.acceptInvitation(invitation.widgetId, invitation.userId, invitation.role, invitation.invitationType);
+      if(invitation.invitationType === 'group'){
+        let res = await this.groupService.getGroupInfo(invitation.groupId)
+        if(!res) throw Error
+        await this.invitationService.acceptGroupInvitation(invitation.groupId, invitation.userId, invitation.role);
+      }else{
+        let res = await this.widgetService.getWidgetInfo(invitation.widgetId);
+        if(!res) throw Error
+        await this.invitationService.acceptWidgetInvitation(invitation.widgetId, invitation.userId, invitation.role);
+      }
     }catch(error){
+      console.log(error)
       this.isToastOpen = true;
       await this.invitationService.deleteInvitation(invitation.widgetId, invitation.userId, invitation.invitationType);
     }

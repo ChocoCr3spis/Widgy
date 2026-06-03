@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonIcon, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, ActionSheetController, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea, IonCardHeader, IonCardTitle, IonCardContent, IonToggle, IonChip, IonInfiniteScrollContent, IonInfiniteScroll, IonRefresherContent, IonRefresher, IonSegment, IonSegmentButton, IonLabel, IonSegmentView, IonSegmentContent, IonAvatar, IonItem, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { add, trash, eyeOutline, pencilOutline, createOutline, shareSocialOutline } from 'ionicons/icons';
+import { add, trash, eyeOutline, pencilOutline, createOutline, shareSocialOutline, exitOutline } from 'ionicons/icons';
 import { UserService } from 'src/app/core/services/integrations/user.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { CommonModule } from '@angular/common';
@@ -78,7 +78,7 @@ export class UserGroups {
     private invitationService: InvitationService
   ) {
     
-    addIcons({ add, trash, eyeOutline, createOutline, shareSocialOutline, pencilOutline});
+    addIcons({ add, trash, eyeOutline, createOutline, shareSocialOutline, pencilOutline, exitOutline });
 
     this.createGroupForm = this.fb.group({
       nombre: [null, [Validators.required, Validators.maxLength(20)]],
@@ -90,7 +90,7 @@ export class UserGroups {
     this.presentingElement = document.querySelector('.ion-page');
     this.user = await this.userService.getCurrentUser();
     this.groupService.getMyGroups().subscribe(g => this.groups = g);
-    this.groupService.getSharedGroups().subscribe(w => this.sharedGroups = w);
+    this.groupService.getSharedGroups().subscribe(sg => this.sharedGroups = sg);
   }
 
   async openCreateGroupModal() {
@@ -157,11 +157,13 @@ export class UserGroups {
           ownerUsername: this.user.username,
           invitationType: 'group',
           groupId: '',
-          userId: user.userId
+          userId: user.userId,
+          groupName: this.createGroupForm.value.nombre!
         });
       });
 
       await this.groupService.createGroup({
+        ownerName: this.user.username,
         ownerId: this.user.uid,
         name: this.createGroupForm.value.nombre!,
         description: this.createGroupForm.value.descripcion  || '',
@@ -195,6 +197,8 @@ export class UserGroups {
     try{
       await this.groupService.modifyGroup(
         this.selectedGroup?.groupId!,
+        this.selectedGroup?.ownerName!,
+        groupInfo ? groupInfo.name : this.selectedGroup?.name,
         groupInfo,
         addedUsers,
         removedUsers,
