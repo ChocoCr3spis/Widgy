@@ -380,7 +380,7 @@ export class Tab1Page {
   }
 
   async deleteInvitation(user: any){
-    await this.invitationService.deleteInvitation(user.widgetId, user.userId);
+    await this.invitationService.deleteInvitation(user.widgetId, user.userId, 'widget');
     this.selectedWidgetSharedWith = await this.widgetService.getWidgetSharedWith(this.selectedWidget?.widgetId!);
   }
 

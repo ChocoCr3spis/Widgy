@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
-import { Firestore, collection, collectionData, deleteDoc, doc, getDocs, orderBy, query, setDoc, where, writeBatch,  } from '@angular/fire/firestore';
-import { Group } from '../../models/group.interface';
+import { Firestore, collection, collectionData, deleteDoc, doc, docData, getDocs, orderBy, query, setDoc, where, writeBatch,  } from '@angular/fire/firestore';
 import { updateDoc } from 'firebase/firestore';
+import { InvitationService } from './invitation.service';
+import { combineLatest, map, of, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ export class GroupService {
 
   private firestore = inject(Firestore);
   private auth = inject(Auth);
+  private invitationService = inject(InvitationService)
 
   getMyGroups() {
     const uid = this.auth.currentUser?.uid;
@@ -31,7 +33,7 @@ export class GroupService {
     updateDoc(userRef, { role: role })
   }
 
-  async createGroup(group: any, users: any[]) {
+  async createGroup(group: any, users: any[], invitations: any[]) {
     const groupRef = doc(collection(this.firestore, 'groups'));
     const batch = writeBatch(this.firestore);
     batch.set(groupRef, { ...group });
@@ -40,6 +42,8 @@ export class GroupService {
       batch.set(memberRef, { userId: user.userId, role: user.role, email: user.email, username: user.username, state: 'pending' });
     });
     await batch.commit();
+
+    this.invitationService.createGroupInvitations(invitations, groupRef.id);
   }
 
   async modifyGroup(groupId: string, group: any, addedUsers: any[], removedUsers: any[], updatedUsers: any[]) {
@@ -78,5 +82,23 @@ export class GroupService {
   deleteGroup(groupId: string){
     const docRef = doc(this.firestore, `groups/${groupId}`);
     return deleteDoc(docRef);
+  }
+
+  getSharedGroups() {
+    const uid = this.auth.currentUser?.uid;
+    const sharedRef = collection(this.firestore,`users/${uid}/sharedGroups`);
+    return collectionData(sharedRef).pipe(switchMap((sharedGroups: any[]) => {
+      if (sharedGroups.length === 0) {
+        return of([]);
+      }
+      const widgetStreams = sharedGroups.map(sharedGroup =>
+        docData( doc(this.firestore, `groups/${sharedGroup.groupId}`),{ idField: 'groupId' }).pipe(
+          map((group: any) => {
+            return { ...group,role: sharedGroup.role }
+          })
+        )
+      );
+      return combineLatest(widgetStreams);
+    }));
   }
 }

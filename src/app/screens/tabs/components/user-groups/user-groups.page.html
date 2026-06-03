@@ -84,11 +84,82 @@
       </div>
     </ion-content>
   </ion-segment-content>
-  <ion-segment-content id="second">Second</ion-segment-content>
+  <ion-segment-content id="second">
+    <ion-content>
+      <div class="my-widgets-cont">  
+        @for (group of sharedGroups; track group.groupId) {
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title class="widget-header">
+                {{ group.name }} 
+                  <ion-chip [outline]="true" color="danger" (click)="leave(group)">
+                    <ion-icon name="exit-outline"></ion-icon>
+                  </ion-chip>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p>{{ group.description }}</p>
+            </ion-card-content>
+          </ion-card>
+        }
+        
+        @if (!sharedGroups) {
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+              <br>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+            </ion-card-content>
+          </ion-card>
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+              <br>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+            </ion-card-content>
+          </ion-card>
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-skeleton-text [animated]="true" style="width: 80px; height: 35px;"></ion-skeleton-text>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+              <br>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+            </ion-card-content>
+          </ion-card>
+        }
+      
+        @if (sharedGroups?.length === 0) {
+          <div class="empty-state">
+            <p>No tienes grupos compartidos</p>
+          </div>
+        }
+      </div>
+    </ion-content>
+  </ion-segment-content>
 </ion-segment-view>
 
 
-<ion-content>
+<!-- <ion-content>
   <div class="group-cont">  
     @for (group of groups; track group.widgetId) {
       <ion-card>
@@ -159,7 +230,7 @@
       </div>
     }
   </div>
-</ion-content>
+</ion-content> -->
 
 <ion-fab slot="fixed" vertical="bottom" horizontal="end">
   <ion-fab-button id="open-modal-create-group">
@@ -178,7 +249,7 @@
           <div class="form">
             <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
             <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
-            <app-search-users (userSelected)="addUser($event, 'create')" [usersForFilter]="addedUsers" [currentUserId]="userId"></app-search-users>
+            <app-search-users (userSelected)="addUser($event, 'create')" [usersForFilter]="addedUsers" [currentUserId]="this.user.uid"></app-search-users>
           </div>
           <p class="added-users">Usuarios añadidos</p>
           <div>
@@ -239,7 +310,7 @@
       <div class="form">
         <ion-input label="Nombre" labelPlacement="floating" fill="outline" type="text" formControlName="nombre"></ion-input>
         <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
-        <app-search-users (userSelected)="addUser($event, 'edit')" [usersForFilter]="addedUsers" [currentUserId]="userId"></app-search-users>
+        <app-search-users (userSelected)="addUser($event, 'edit')" [usersForFilter]="addedUsers" [currentUserId]="this.user.uid"></app-search-users>
       </div>
       <p class="added-users">Usuarios añadidos</p>
       <div>

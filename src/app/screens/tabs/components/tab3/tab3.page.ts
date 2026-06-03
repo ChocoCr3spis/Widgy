@@ -62,7 +62,6 @@ export class Tab3Page {
       dateTo: [null],
       ownerName: [''],
     });
-
   }
 
   async ngOnInit() {
@@ -78,7 +77,6 @@ export class Tab3Page {
   async refresh(event: any){
     const filters = this.filterPublicWidgetsForm.value;
     const res = await this.widgetService.getPublicWidgets({ ...filters });
-
     this.widgets = res.data;
     this.lastWidget = res.lastDoc;
 

@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { SearchUsers } from "src/app/shared/search-users/search-users.page";
 import { GroupService } from 'src/app/core/services/integrations/group.service';
 import { Group } from 'src/app/core/models/group.interface';
+import { InvitationService } from 'src/app/core/services/integrations/invitation.service';
 
 @Component({
   selector: 'app-user-groups',
@@ -55,8 +56,9 @@ export class UserGroups {
   createGroupForm: FormGroup;
   addedUsers: any[] = [];
 
-  userId: string = "";
+  user: any = null;
   groups?: Group[] | any;
+  sharedGroups?: any[] | null = null;
 
   selectedGroup: Group | null = null;
   selectedGroupUsers: any[] = [];
@@ -72,7 +74,8 @@ export class UserGroups {
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private groupService: GroupService
+    private groupService: GroupService,
+    private invitationService: InvitationService
   ) {
     
     addIcons({ add, trash, eyeOutline, createOutline, shareSocialOutline, pencilOutline});
@@ -85,8 +88,9 @@ export class UserGroups {
 
   async ngOnInit() {
     this.presentingElement = document.querySelector('.ion-page');
-    this.userId = (await this.userService.getCurrentUser()).uid;
+    this.user = await this.userService.getCurrentUser();
     this.groupService.getMyGroups().subscribe(g => this.groups = g);
+    this.groupService.getSharedGroups().subscribe(w => this.sharedGroups = w);
   }
 
   async openCreateGroupModal() {
@@ -143,12 +147,26 @@ export class UserGroups {
   async createGroup(modal: any){
     this.saving = true;
     try{
+      let invitations: any[] = [];
+      this.addedUsers.forEach(async (user) => {
+        invitations.push({
+          email: user.email,
+          username: user.username,
+          createdAt: Timestamp.now(),
+          role: user.role,
+          ownerUsername: this.user.username,
+          invitationType: 'group',
+          groupId: '',
+          userId: user.userId
+        });
+      });
+
       await this.groupService.createGroup({
-        ownerId: this.userId,
+        ownerId: this.user.uid,
         name: this.createGroupForm.value.nombre!,
         description: this.createGroupForm.value.descripcion  || '',
         createdAt: Timestamp.now()
-      }, this.addedUsers );
+      }, this.addedUsers, invitations);
     }catch(error){
       console.log(error)
     }
@@ -195,5 +213,9 @@ export class UserGroups {
     try{
       await this.groupService.deleteGroup(group.groupId!);
     }catch(err){}
+  }
+
+  async leave(group: any){
+    await this.invitationService.deleteInvitation(group.groupId, (await (this.userService.getCurrentUser())).uid, 'group');
   }
 }

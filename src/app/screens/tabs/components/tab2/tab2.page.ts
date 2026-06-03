@@ -76,7 +76,7 @@ export class Tab2Page {
   }
 
   async leave(widget: any){
-    await this.invitationService.deleteInvitation(widget.widgetId, (await (this.userService.getCurrentUser())).uid);
+    await this.invitationService.deleteInvitation(widget.widgetId, (await (this.userService.getCurrentUser())).uid, 'widget');
   }
 
   async openEditModal(widget: any) {

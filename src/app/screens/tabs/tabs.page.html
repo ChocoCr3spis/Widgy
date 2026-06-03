@@ -61,7 +61,11 @@
                 <img [src]="invitation.photoUrl || 'assets/profile/default_profile_image.jpeg'">
               </ion-avatar>
               <ion-label>
-                <h2>Has sido invitado/a a un widget de {{ invitation.widgetType == 'text' ? 'texto' : invitation.widgetType == 'vote' ? 'votación' : 'imagen' }} con permisos de {{ invitation.role == 'editor' ? 'edición' : 'visualicación' }}</h2>
+                @if(invitation.invitationType === 'group'){
+                   <h2>Has sido invitado/a a un grupo llamado {{ invitation.name }}</h2>
+                }@else{
+                  <h2>Has sido invitado/a a un widget de {{ invitation.widgetType == 'text' ? 'texto' : invitation.widgetType == 'vote' ? 'votación' : 'imagen' }} con permisos de {{ invitation.role == 'editor' ? 'edición' : 'visualicación' }}</h2>
+                }
                 <p>Invitado/a por {{ invitation.ownerUsername }}</p>
               </ion-label>
               <ion-chip [outline]="true" color="danger" (click)="rejectInvitation(invitation)">

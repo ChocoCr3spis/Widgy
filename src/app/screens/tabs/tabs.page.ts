@@ -49,25 +49,16 @@ export class TabsPage {
   }
 
   async rejectInvitation(invitation: any){
-    await this.invitationService.rejectInvitation(invitation.widgetId, invitation.userId)
+    await this.invitationService.rejectInvitation(invitation.widgetId, invitation.userId, invitation.invitationType);
   }
 
   async acceptInvitation(invitation: any){
     try{
-      const widgetInfo: any = await this.widgetService.getWidgetInfo(invitation.widgetId)
-      const widgetPayload = {
-        data: widgetInfo!.data,
-        description: widgetInfo!.description,
-        name: widgetInfo!.name,
-        ownerId: widgetInfo!.ownerId,
-        type: widgetInfo!.type,
-        role: invitation.role,
-        createdAt: Timestamp.now()
-      }
-      await this.invitationService.acceptInvitation(invitation.widgetId, invitation.userId, widgetPayload)
+      await this.invitationService.acceptInvitation(invitation.widgetId, invitation.userId, invitation.role, invitation.invitationType);
     }catch(error){
+      console.error('Error accepting invitation:', error);
       this.isToastOpen = true;
-      await this.invitationService.deleteInvitation(invitation.widgetId, invitation.userId)
+      await this.invitationService.deleteInvitation(invitation.widgetId, invitation.userId, invitation.invitationType);
     }
   }
 
