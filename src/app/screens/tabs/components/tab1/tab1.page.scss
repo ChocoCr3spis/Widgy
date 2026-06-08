@@ -50,3 +50,25 @@
 .shared-with {
   font-size: 1.5rem;
 }
+
+.group-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.invitation-sended-cont {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+  height: 44px;
+}
+
+.invitation-sended {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: #949494;
+  margin: 0;
+}

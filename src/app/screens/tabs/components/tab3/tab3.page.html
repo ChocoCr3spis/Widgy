@@ -118,11 +118,17 @@
         }
         @if (widget.type === 'vote') {
           <p>{{ widget.data.question }}</p>
-          @for (option of widget.data.options; track option.text) {
-            <p>
-              {{ option.text }} - {{ option.votes }}
-            </p>
-          }
+          <div class="vote-options">
+            @for (option of widget.data.options; track option.text) {
+              <div class="poll-option" (click)="vote(widget, option.id)" [class.selected]="widget.myVote === option.id ">
+                <div class="poll-fill" [style.width.%]="getPercentage(widget, option)"></div>
+                <div class="poll-content">
+                  <span>{{ option.text }}</span>
+                  <span>{{ getPercentage(widget, option) }}%</span>
+                </div>
+              </div>
+            }
+          </div>
         }
       </ion-card-content>
     </ion-card>

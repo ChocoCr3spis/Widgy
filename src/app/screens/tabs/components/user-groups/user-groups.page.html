@@ -1,16 +1,16 @@
 <ion-segment value="first">
   <ion-segment-button value="first" content-id="first">
-    <ion-label>First</ion-label>
+    <ion-label>Propios</ion-label>
   </ion-segment-button>
   <ion-segment-button value="second" content-id="second">
-    <ion-label>Second</ion-label>
+    <ion-label>Asociados</ion-label>
   </ion-segment-button>
 </ion-segment>
 <ion-segment-view>
   <ion-segment-content id="first">
     <ion-content>
       <div class="group-cont">  
-        @for (group of groups; track group.widgetId) {
+        @for (group of groups; track group.groupId) {
           <ion-card>
             <ion-card-header>
               <ion-card-title class="group-header">

@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonIcon, IonSkeletonText, IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonInput, IonCard, IonTextarea, IonCardHeader, IonCardTitle, IonCardContent, IonToggle, IonChip, IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonItem, IonAvatar } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { fileTray, image, text, add, trash, appsOutline, eyeOutline, eyeOffOutline, createOutline, shareSocialOutline, pencilOutline } from 'ionicons/icons';
+import { fileTray, image, text, add, trash, appsOutline, eyeOutline, eyeOffOutline, createOutline, shareSocialOutline, pencilOutline, paperPlaneOutline, checkmarkOutline } from 'ionicons/icons';
 import { Platform } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { UserService } from 'src/app/core/services/integrations/user.service';
@@ -13,6 +13,8 @@ import { CommonModule } from '@angular/common';
 import { SearchUsers } from "src/app/shared/search-users/search-users.page";
 import { FormsModule } from '@angular/forms';
 import { InvitationService } from 'src/app/core/services/integrations/invitation.service';
+import { GroupService } from 'src/app/core/services/integrations/group.service';
+import { Group } from 'src/app/core/models/group.interface';
 
 @Component({
   selector: 'app-tab1',
@@ -68,9 +70,10 @@ export class Tab1Page {
 
   user: any;
   widgets?: Widget[] | any;
+  groups?: Group[] | any = [];
   lastWidget: any = null;
 
-  selectedWidget: Widget | null = null;
+  selectedWidget: any | null = null;
   selectedWidgetSharedWith: any[] | null = null;
   @ViewChild('modalShare')
   modalShare!: IonModal;
@@ -85,10 +88,11 @@ export class Tab1Page {
     private platform: Platform,
     private userService: UserService,
     private widgetService: WidgetService,
-    private invitationService: InvitationService
+    private invitationService: InvitationService,
+    private groupService: GroupService
   ) {
     
-    addIcons({ fileTray, image, text, add, trash, appsOutline, eyeOutline, eyeOffOutline, createOutline, shareSocialOutline, pencilOutline });
+    addIcons({ fileTray, image, text, add, trash, appsOutline, eyeOutline, eyeOffOutline, createOutline, shareSocialOutline, pencilOutline, paperPlaneOutline, checkmarkOutline });
 
     this.textWidgetForm = this.fb.group({
       nombre: [null, [Validators.required, Validators.maxLength(20)]],
@@ -127,6 +131,12 @@ export class Tab1Page {
     this.presentingElement = document.querySelector('.ion-page');
     this.user = (await this.userService.getCurrentUser());
     this.widgetService.getMyWidgets().subscribe(w => { this.widgets = w });
+    this.groupService.getMyGroups().subscribe(g => {
+      g.forEach(g => {
+        this.groups.push({ groupData: g, sended: false })
+      });
+      console.log(this.groups)
+    });
   }
 
   async openShareModal(widget: Widget) {
@@ -205,17 +215,18 @@ export class Tab1Page {
     try{
       switch(widgetType){
         case 'vote':
-          const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({text: option,votes: 0}));
+          const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({id: crypto.randomUUID(), text: option, votes: 0}));
           await this.widgetService.createWidget({
             ownerId: this.user.uid,
             visibility: this.voteWidgetForm.value.public ? 'public' : 'private',
             type: 'vote',
             name: this.voteWidgetForm.value.nombre!,
-            description: this.voteWidgetForm.value.descripcion  || '',
+            description: this.voteWidgetForm.value.descripcion || '',
             createdAt: Timestamp.now(),
             data: {
               question: this.voteWidgetForm.value.pregunta,
-              options: options
+              totalVotes: 0,
+              options
             }
           });
           this.voteWidgetForm.reset();
@@ -258,14 +269,15 @@ export class Tab1Page {
     try{
       switch(this.selectedWidget?.type){
         case 'vote':
-          const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({text: option,votes: 0}));
+          const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({id: crypto.randomUUID(), text: option, votes: 0}));
           await this.widgetService.modifyWidget({
             visibility: this.voteWidgetForm.value.public ? 'public' : 'private',
             name: this.voteWidgetForm.value.nombre!,
             description: this.voteWidgetForm.value.descripcion  || '',
             data: {
               question: this.voteWidgetForm.value.pregunta,
-              options: options
+              options: options,
+              totalVotes: this.selectedWidget.data.totalVotes
             }
           }, this.selectedWidget.widgetId!);
           this.voteWidgetForm.reset();
@@ -379,6 +391,28 @@ export class Tab1Page {
     this.selectedWidgetSharedWith = await this.widgetService.getWidgetSharedWith(this.selectedWidget?.widgetId!);
   }
 
+  async sendInvitationForGroup(group: any){
+    this.saving = true;
+    let invitations: any [] = [];
+    let userFromGroup: any = await this.groupService.getMyGroupsUsers(group.groupData.groupId);
+    userFromGroup.forEach((u: any) => {
+      invitations.push({
+        email: u.email,
+        username: u.username,
+        createdAt: Timestamp.now(),
+        role: 'viewer',
+        ownerUsername: this.user.username,
+        invitationType: 'widget',
+        widgetId: this.selectedWidget?.widgetId,
+        widgetType: this.selectedWidget?.type,
+        userId: u.userId
+      })
+    });
+    group.sended = true;
+    await this.invitationService.createGroupInvitationsWidget(invitations);
+    this.saving = false;
+  }
+
   async deleteInvitation(user: any){
     await this.invitationService.deleteInvitation(user.widgetId, user.userId, 'widget');
     this.selectedWidgetSharedWith = await this.widgetService.getWidgetSharedWith(this.selectedWidget?.widgetId!);
@@ -387,5 +421,15 @@ export class Tab1Page {
   async changeRole(user: any, role: string){
     this.selectedWidgetSharedWith!.find(u => u.userId == user.userId).role = role;
     await this.invitationService.modifyInvitation(user.widgetId, user.userId, role);
+  }
+
+  vote(widget: any, optionId: string){
+    this.widgetService.vote(widget, optionId)
+  }
+
+  getPercentage(widget: any, option: any): number {
+    const totalVotes = widget.data.options.reduce((sum: number, opt: any) => sum + opt.votes, 0);
+    if (totalVotes === 0) return 0;
+    return Math.round((option.votes / totalVotes) * 100);
   }
 }

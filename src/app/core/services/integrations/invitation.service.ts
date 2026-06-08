@@ -20,6 +20,17 @@ export class InvitationService {
     await batch.commit();
   }
 
+  async createGroupInvitationsWidget(invitations: any){
+    const batch = writeBatch(this.firestore);
+    invitations.forEach((invitation: any) => {
+      const widgetRef = doc(this.firestore,`widgets/${invitation.widgetId}/invitations/${invitation.userId}`);
+      const invitedUserRef = doc(this.firestore,`users/${invitation.userId}/invitations/${invitation.widgetId}`);
+      batch.set(widgetRef, invitation);
+      batch.set(invitedUserRef, invitation);
+    });
+    await batch.commit();
+  }
+
   async createGroupInvitations(invitations: any, groupId: string){
     const batch = writeBatch(this.firestore);
     invitations.forEach((invitation: any) => {

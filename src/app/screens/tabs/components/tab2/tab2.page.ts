@@ -147,14 +147,15 @@ export class Tab2Page {
     try{
       switch(this.selectedWidget?.type){
         case 'vote':
-          const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({text: option,votes: 0}));
+          const options = this.voteWidgetForm.value.opciones!.map((option: any) => ({id: crypto.randomUUID(), text: option, votes: 0}));
           await this.widgetService.modifyWidget({
             visibility: this.voteWidgetForm.value.public ? 'public' : 'private',
             name: this.voteWidgetForm.value.nombre!,
             description: this.voteWidgetForm.value.descripcion  || '',
             data: {
               question: this.voteWidgetForm.value.pregunta,
-              options: options
+              options: options,
+              totalVotes: this.selectedWidget.data.totalVotes
             }
           }, this.selectedWidget.widgetId!);
           this.voteWidgetForm.reset();
@@ -242,5 +243,15 @@ export class Tab2Page {
     if (this.opciones.length > 2) {
       this.opciones.removeAt(index);
     }
+  }
+
+  vote(widget: any, optionId: string){
+    this.widgetService.vote(widget, optionId)
+  }
+
+  getPercentage(widget: any, option: any): number {
+    const totalVotes = widget.data.options.reduce((sum: number, opt: any) => sum + opt.votes, 0);
+    if (totalVotes === 0) return 0;
+    return Math.round((option.votes / totalVotes) * 100);
   }
 }

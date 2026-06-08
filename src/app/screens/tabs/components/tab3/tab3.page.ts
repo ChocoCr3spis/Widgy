@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import {  IonAvatar, IonChip, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonDatetime, IonDatetimeButton, IonFab, IonFabButton, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList, IonInput, IonModal, IonRefresher, IonRefresherContent, IonHeader, IonSearchbar, IonSelect, IonSelectOption, IonToolbar, IonTitle } from '@ionic/angular/standalone';
+import {  IonAvatar, IonChip, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonDatetime, IonDatetimeButton, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonModal, IonRefresher, IonRefresherContent, IonHeader, IonSearchbar, IonSelect, IonSelectOption, IonToolbar, IonTitle } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { filter, trash } from 'ionicons/icons';
 import { WidgetService } from 'src/app/core/services/integrations/widget.service';
@@ -28,7 +28,6 @@ import { UserService } from 'src/app/core/services/integrations/user.service';
     IonItem,
     IonInfiniteScroll, 
     IonInfiniteScrollContent,
-    IonInput,
     IonLabel,
     IonRefresher,
     IonRefresherContent,
@@ -162,6 +161,19 @@ export class Tab3Page {
 
   clearDate(field: 'dateFrom' | 'dateTo') {
     this.filterPublicWidgetsForm.patchValue({ [field]: null });
+  }
+
+  vote(widget: any, optionId: string){
+    this.widgetService.vote(widget, optionId)
+    widget.data.options[widget.data.options.findIndex( (o: { id: string; }) => o.id == optionId)].votes += 1;
+    widget.data.options[widget.data.options.findIndex( (o: { id: string; }) => o.id == widget.myVote)].votes -= 1
+    widget.myVote = optionId;
+  }
+
+  getPercentage(widget: any, option: any): number {
+    const totalVotes = widget.data.options.reduce((sum: number, opt: any) => sum + opt.votes, 0);
+    if (totalVotes === 0) return 0;
+    return Math.round((option.votes / totalVotes) * 100);
   }
 
 }

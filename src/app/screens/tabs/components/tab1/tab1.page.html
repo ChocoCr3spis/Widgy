@@ -28,14 +28,14 @@
             @case ('vote') {
               <p>{{ widget.data.question }}</p>
               <div class="vote-options">
-                @for (
-                  option of widget.data.options;
-                  track option.text
-                ) {
-                  <ion-chip>
-                    {{ option.text }}
-                    ({{ option.votes }})
-                  </ion-chip>
+                @for (option of widget.data.options; track option.text) {
+                  <div class="poll-option" (click)="vote(widget, option.id)" [class.selected]="widget.myVote === option.id ">
+                    <div class="poll-fill" [style.width.%]="getPercentage(widget, option)"></div>
+                    <div class="poll-content">
+                      <span>{{ option.text }}</span>
+                      <span>{{ getPercentage(widget, option) }}%</span>
+                    </div>
+                  </div>
                 }
               </div>
             }
@@ -288,7 +288,33 @@
           }
         }
         @else{
-          contenido grupos
+          @for (group of groups; track group.groupData.groupId) {
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title class="group-header">
+                  {{ group.groupData.name }} 
+                  @if(!group.sended){
+                    @if(!saving){
+                      <ion-button (click)="sendInvitationForGroup(group)">
+                        <ion-icon name="paper-plane-outline"></ion-icon>
+                      </ion-button>
+                    }@else {
+                      <div class="invitation-sended-cont">
+                        <ion-button [className]="'loading-btn-group'" [disabled]="true">
+                          <ion-spinner name="crescent"></ion-spinner>
+                        </ion-button>
+                      </div>
+                    }
+                  }@else{
+                    <div class="invitation-sended-cont">
+                      <p class="invitation-sended">Invitaciones enviadas</p>
+                      <ion-icon name="checkmark-outline" color="success"></ion-icon>
+                    </div>
+                  }
+                </ion-card-title>
+              </ion-card-header>
+            </ion-card>
+          }
         }
       </div>
     </ion-content>
@@ -336,26 +362,41 @@
             <ion-input label="Descripción" labelPlacement="floating" fill="outline" type="text" formControlName="descripcion"></ion-input>
             <ion-input label="Pregunta" labelPlacement="floating" fill="outline" type="text" formControlName="pregunta"></ion-input>
             <div formArrayName="opciones" class="opciones">
-              @for(opcion of opciones.controls; track opcion){
-                <div class="opcion">
-                  <ion-input
-                    [label]="'Opción ' + ($index + 1)"
-                    labelPlacement="floating"
-                    fill="outline"
-                    [formControlName]="$index">
-                  </ion-input>
-                  @if($index > 1){
-                    <ion-button fill="clear" color="danger" (click)="removeOption($index)">
-                      <ion-icon name="trash"></ion-icon>
-                    </ion-button>
+              @if(this.selectedWidget?.data.totalVotes != 0){
+                <div class="vote-options">
+                  @for (option of selectedWidget.data.options; track option.text) {
+                    <div class="poll-option">
+                      <div class="poll-fill" [style.width.%]="getPercentage(selectedWidget, option)"></div>
+                      <div class="poll-content">
+                        <span>{{ option.text }}</span>
+                        <span>{{ getPercentage(selectedWidget, option) }}%</span>
+                      </div>
+                    </div>
                   }
                 </div>
+              }@else{
+                @for(opcion of opciones.controls; track opcion){
+                  <div class="opcion">
+                    <ion-input
+                      [label]="'Opción ' + ($index + 1)"
+                      labelPlacement="floating"
+                      fill="outline"
+                      [formControlName]="$index">
+                    </ion-input>
+                    @if($index > 1){
+                      <ion-button fill="clear" color="danger" (click)="removeOption($index)">
+                        <ion-icon name="trash"></ion-icon>
+                      </ion-button>
+                    }
+                  </div>
+                }
               }
             </div>
-
-            <ion-button class="ion-padding" expand="block" fill="outline" (click)="addOption()">
-              + Añadir opción
-            </ion-button>
+            @if(this.selectedWidget?.data?.totalVotes == 0){
+              <ion-button class="ion-padding" expand="block" fill="outline" (click)="addOption()">
+                + Añadir opción
+              </ion-button>
+            }
           </div>
         }
       }

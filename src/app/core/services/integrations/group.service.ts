@@ -59,7 +59,6 @@ export class GroupService {
     const batch = writeBatch(this.firestore);
     // ADD
     addedUsers.forEach(user => {
-      debugger
       const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
       batch.set(ref, {
         userId: user.userId,
@@ -96,7 +95,6 @@ export class GroupService {
   
     // UPDATE
     updatedUsers.forEach(user => {
-      debugger
       const ref = doc(this.firestore,`groups/${groupId}/members/${user.userId}`);
       if(user.state === 'pending'){
         const invitedUserRef = doc(this.firestore,`users/${user.userId}/invitations/${groupId}`);
@@ -151,21 +149,3 @@ export class GroupService {
     }));
   }
 }
-
-// getSharedWidgets() {
-//   const uid = this.auth.currentUser?.uid;
-//   const sharedRef = collection(this.firestore,`users/${uid}/sharedWidgets`);
-//   return collectionData(sharedRef).pipe(switchMap((sharedWidgets: any[]) => {
-//     if (sharedWidgets.length === 0) {
-//       return of([]);
-//     }
-//     const widgetStreams = sharedWidgets.map(sharedWidget =>
-//       docData( doc(this.firestore, `widgets/${sharedWidget.widgetId}`),{ idField: 'widgetId' }).pipe(
-//         map((widget: any) => {
-//           return { ...widget, role: sharedWidget.role }
-//         })
-//       )
-//     );
-//     return combineLatest(widgetStreams);
-//   }));
-// }

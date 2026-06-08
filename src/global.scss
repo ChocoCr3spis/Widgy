@@ -67,6 +67,12 @@ ion-chip > ion-icon {
   height: 78px;
 }
 
+.loading-btn-group {
+  height: 36px;
+  width: 49.67px;
+  margin: 0 !important;
+}
+
 .widget-header {
   display: flex;
   justify-content: space-between;
@@ -76,3 +82,39 @@ ion-chip > ion-icon {
   display: flex;
   justify-content: end;
 }
+
+.poll-option {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ion-color-medium);
+  border-radius: 999px;
+  margin: 12px 0;
+  cursor: pointer;
+}
+
+.poll-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(var(--ion-color-primary-rgb), .2);
+  transition: width .3s;
+}
+
+.poll-content {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+  font-weight: 600;
+}
+
+.selected {
+  border-color: var(--ion-color-primary);
+}
+
+.total-votes {
+  color: var(--ion-color-medium);
+  font-size: .9rem;
+  margin-top: 8px;
+} 
